@@ -1,7 +1,13 @@
-# Welcome to your Expo app 👋
+# todoistClone React Native (learning project)
 
 This is an [Expo](https://expo.dev) project created with
-[`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+[`create-expo-app`](https://www.npmjs.com/package/create-expo-app) and I'm
+learning from Simon Grimm how to create React Native apps.
+
+This project follows
+[this video tutorial](https://www.youtube.com/watch?v=_k5v0KOfNZ0) from Simon on
+how to create React Native apps. Many thank for his tutorials helping others
+like me becoming a better RN developer!
 
 ## Get started
 
