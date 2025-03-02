@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
 import { tokenCache } from "@/utils/cache";
+import { Colors } from "@/constants/Colors";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
@@ -11,16 +12,27 @@ if (!publishableKey) {
 }
 
 const InitialLayout = () => {
-  return <Stack />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: Colors.background },
+      }}
+    >
+      <Stack.Screen name="index" />
+    </Stack>
+  );
 };
 
-export const RootLayout = () => {
+const RootLayout = () => {
   return (
     // wrapping up in ClerkProvider with ClerkLoaded to ensure it is loaded
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <ClerkLoaded>
-        <InitialLayout />
-      </ClerkLoaded>
+      {/* <ClerkLoaded> */}
+      <InitialLayout />
+      {/* </ClerkLoaded> */}
     </ClerkProvider>
   );
 };
+
+export default RootLayout;
