@@ -1,4 +1,5 @@
 import * as WebBrowser from "expo-web-browser";
+import { StyleSheet } from "react-native";
 import {
   UseOAuthFlowParams,
   useSSO,
@@ -7,10 +8,12 @@ import {
 } from "@clerk/clerk-expo";
 import { useCallback } from "react";
 import { Button, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_apple" });
   const { startOAuthFlow: googleAuth } = useOAuth({ strategy: "oauth_google" });
+  const { top } = useSafeAreaInsets();
   // const { startSSOFlow } = useSSO();
 
   const handleAppleOAuth = async () => {
@@ -51,14 +54,15 @@ export default function Index() {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
+    <View style={[style.container, { paddingTop: top }]}>
       <Text>Edit app/index.tsx to edit this screen.</Text>
     </View>
   );
 }
+
+const style = StyleSheet.create({
+  container: {
+    gap: 40,
+    marginTop: 20,
+  },
+});
