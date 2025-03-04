@@ -1,5 +1,5 @@
 import * as WebBrowser from "expo-web-browser";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Image } from "react-native";
 import {
   UseOAuthFlowParams,
   useSSO,
@@ -54,15 +54,24 @@ export default function Index() {
   };
 
   return (
-    <View style={[style.container, { paddingTop: top }]}>
-      <Text>Edit app/index.tsx to edit this screen.</Text>
+    <View style={[styles.container, { paddingTop: top }]}>
+      <Image
+        style={styles.loginImage}
+        source={require("@/assets/images/todoist-logo.png")}
+      />
     </View>
   );
 }
 
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     gap: 40,
     marginTop: 20,
+  },
+  loginImage: {
+    // Using resize "contain" to resize images with heigh or width keeping the original image ratio
+    height: 40,
+    resizeMode: "contain",
+    alignSelf: "center",
   },
 });
