@@ -59,6 +59,10 @@ export default function Index() {
         style={styles.loginImage}
         source={require("@/assets/images/todoist-logo.png")}
       />
+      <Image
+        style={styles.bannerImage}
+        source={require("@/assets/images/login.png")}
+      />
     </View>
   );
 }
@@ -71,6 +75,11 @@ const styles = StyleSheet.create({
   loginImage: {
     // Using resize "contain" to resize images with heigh or width keeping the original image ratio
     height: 40,
+    resizeMode: "contain",
+    alignSelf: "center",
+  },
+  bannerImage: {
+    height: 280,
     resizeMode: "contain",
     alignSelf: "center",
   },
