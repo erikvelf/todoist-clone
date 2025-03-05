@@ -2,6 +2,8 @@ import { Stack } from "expo-router";
 import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
 import { tokenCache } from "@/utils/cache";
 import { Colors } from "@/constants/Colors";
+import { View } from "react-native";
+import { StatusBar } from "expo-status-bar";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
@@ -24,10 +26,11 @@ const InitialLayout = () => {
   );
 };
 
+/* wrapping up in ClerkProvider with ClerkLoaded to ensure it is loaded */
 const RootLayout = () => {
   return (
-    // wrapping up in ClerkProvider with ClerkLoaded to ensure it is loaded
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <StatusBar style="dark" />
       {/* <ClerkLoaded> */}
       <InitialLayout />
       {/* </ClerkLoaded> */}
