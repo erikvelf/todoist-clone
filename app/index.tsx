@@ -76,6 +76,11 @@ export default function Index() {
           <Ionicons name="logo-google" size={24} />
           <Text style={styles.buttonText}>Continue with Google</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={handleAppleOAuth}>
+          <Ionicons name="mail" size={24} />
+          <Text style={styles.buttonText}>Continue with Email</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
