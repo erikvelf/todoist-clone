@@ -9,6 +9,9 @@ import {
 import { useCallback } from "react";
 import { Button, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity } from "react-native";
+import { Colors } from "@/constants/Colors";
 
 export default function Index() {
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_apple" });
@@ -63,6 +66,12 @@ export default function Index() {
         style={styles.bannerImage}
         source={require("@/assets/images/login.png")}
       />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={handleAppleOAuth}>
+          <Ionicons name="logo-apple" size={24} />
+          <Text style={styles.buttonText}>Continue with Apple</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -82,5 +91,23 @@ const styles = StyleSheet.create({
     height: 280,
     resizeMode: "contain",
     alignSelf: "center",
+  },
+  buttonContainer: {
+    gap: 20,
+    marginHorizontal: 40,
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    padding: 12,
+    borderRadius: 6,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.lightBorder,
+  },
+  buttonText: {
+    fontSize: 20,
+    fontWeight: "500",
   },
 });
