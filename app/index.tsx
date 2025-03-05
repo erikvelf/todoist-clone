@@ -72,12 +72,12 @@ export default function Index() {
           <Text style={styles.buttonText}>Continue with Apple</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={handleAppleOAuth}>
+        <TouchableOpacity style={styles.button} onPress={handleGoogleOAuth}>
           <Ionicons name="logo-google" size={24} />
           <Text style={styles.buttonText}>Continue with Google</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={handleAppleOAuth}>
+        <TouchableOpacity style={styles.button}>
           <Ionicons name="mail" size={24} />
           <Text style={styles.buttonText}>Continue with Email</Text>
         </TouchableOpacity>
