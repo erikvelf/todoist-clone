@@ -84,8 +84,13 @@ export default function Index() {
 
         <Text style={styles.description}>
           By continuing you agree to Todoist's
-          <Text style={styles.link}>Terms of Service</Text> and{" "}
-          <Text style={styles.link}>Privacy Policy</Text>
+          <Text style={styles.link} onPress={openLink}>
+            Terms of Service
+          </Text>{" "}
+          and{" "}
+          <Text style={styles.link} onPress={openLink}>
+            Privacy Policy
+          </Text>
         </Text>
       </View>
     </View>
