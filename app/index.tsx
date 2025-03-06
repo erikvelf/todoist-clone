@@ -81,6 +81,12 @@ export default function Index() {
           <Ionicons name="mail" size={24} />
           <Text style={styles.buttonText}>Continue with Email</Text>
         </TouchableOpacity>
+
+        <Text style={styles.description}>
+          By continuing you agree to Todoist's
+          <Text style={styles.link}>Terms of Service</Text> and{" "}
+          <Text>Privacy Policy</Text>
+        </Text>
       </View>
     </View>
   );
@@ -119,5 +125,15 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 20,
     fontWeight: "500",
+  },
+  link: {
+    color: Colors.lightText,
+    fontSize: 12,
+    textDecorationLine: "underline",
+  },
+  description: {
+    textAlign: "center",
+    color: Colors.lightText,
+    fontSize: 12,
   },
 });
