@@ -39,7 +39,7 @@ export default function Index() {
     try {
       // Important for updating our current session
       const { createdSessionId, setActive } = await googleAuth();
-      console.log("handleAppleOAuth ~ createSessionId", createdSessionId);
+      console.log("handleGoogleOAuth ~ createSessionId", createdSessionId);
 
       // locally set the user as active using the current sessionId
       if (createdSessionId) {
