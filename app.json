@@ -41,7 +41,15 @@
 					"launchMode": "most-recent"
 				}
 			],
-			["react-native-bottom-tabs"]
+			"react-native-bottom-tabs",
+			[
+				"expo-build-properties",
+				{
+					"ios": {
+						"useFrameworks": "static"
+					}
+				}
+			]
 		],
 		"experiments": {
 			"typedRoutes": true
