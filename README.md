@@ -20,11 +20,18 @@ like me becoming a better RN developer!
    variable** that could affect emulator performance, unset it or delete it (as
    said in the message of Android Studio) before attempting to make a prebuild.
 
+   If you encounter a problem (like me on GNU/Linux) "System limit for number of
+   file watchers reached", you will have to modify this number by doing the
+   following:
+   ```sh
+   sudo sysctl fs.inotify.max_user_watches=524288 # increase the max number temporarely, not a permanent solution
+   ```
+
    ```sh
    # Android
    npx expo prebuild -p android --clean
    # IOS (only on Mac)
-   npx expo prebuild -p android --clean
+   npx expo prebuild -p ios --clean
    ```
 
 3. Start the app:
