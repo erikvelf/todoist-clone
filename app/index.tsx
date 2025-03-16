@@ -6,7 +6,6 @@ import {
   StartSSOFlowParams,
   useOAuth,
 } from "@clerk/clerk-expo";
-import { useCallback } from "react";
 import { Button, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
