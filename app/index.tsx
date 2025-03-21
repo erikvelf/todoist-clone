@@ -1,12 +1,7 @@
 import * as WebBrowser from "expo-web-browser";
 import { StyleSheet, Image } from "react-native";
-import {
-  UseOAuthFlowParams,
-  useSSO,
-  StartSSOFlowParams,
-  useOAuth,
-} from "@clerk/clerk-expo";
-import { Button, Text, View } from "react-native";
+import { StartSSOFlowParams, useOAuth } from "@clerk/clerk-expo";
+import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
