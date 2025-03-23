@@ -1,16 +1,28 @@
 import { Tabs } from "@/components/Tabs";
+import { Image, ImageSourcePropType, Platform } from "react-native";
+import Icon from "@react-native-vector-icons/ionicons";
+// import { name as ionicIconsName } from "@react-native-vector-icons/ionicons" // TODO figure out how to get ionicicons IconUri parameters for generalIconsParams
+import { Colors } from "@/constants/Colors";
+import { SFSymbol } from "expo-symbols";
+import { AppleIcon } from "react-native-bottom-tabs";
+
+// This code will be removed, I was testing if finnaly the react-native-vector-icons/ionicons library worked
+const source = Icon.getImageSourceSync("home", 30, "red");
+console.log(source?.uri);
+//
+
+const iconSize: number = 30;
+const iconActiveColor: string = Colors.primary;
+const iconInactiveColor: string = Colors.dark;
 
 const TabLayout = () => {
-  // sfSymbol is a lib of icons from an installed icons package
   return (
     <Tabs>
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ focused }) => ({
-            sfSymbol: focused ? "house.fill" : "house",
-          }),
+          tabBarIcon: () => ({ uri: source?.uri }),
         }}
       />
       <Tabs.Screen
