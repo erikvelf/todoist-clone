@@ -21,6 +21,15 @@ interface iosIconParams {
   inactiveAppleIcon: AppleIcon;
 }
 
+// TODO fix types for IconUri so the names of the icons are suggested
+interface generalIconParams {
+  size: number;
+  activeIconUri: string;
+  inactiveIconUri: string;
+  activeColor: string;
+  inactiveColor: string;
+}
+
 const TabLayout = () => {
   return (
     <Tabs>
