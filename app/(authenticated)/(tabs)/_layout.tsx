@@ -32,7 +32,10 @@ interface generalIconParams {
 
 const TabLayout = () => {
   return (
-    <Tabs>
+    <Tabs
+      tabBarActiveTintColor={Colors.primary}
+      tabBarInactiveTintColor={Colors.dark}
+    >
       <Tabs.Screen
         name="index"
         options={{
