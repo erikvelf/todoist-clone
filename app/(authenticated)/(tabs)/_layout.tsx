@@ -15,6 +15,12 @@ const iconSize: number = 30;
 const iconActiveColor: string = Colors.primary;
 const iconInactiveColor: string = Colors.dark;
 
+interface iosIconParams {
+  size: number;
+  activeAppleIcon: AppleIcon;
+  inactiveAppleIcon: AppleIcon;
+}
+
 const TabLayout = () => {
   return (
     <Tabs>
