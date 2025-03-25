@@ -5,6 +5,7 @@ import Icon from "@react-native-vector-icons/ionicons";
 import { Colors } from "@/constants/Colors";
 import { SFSymbol } from "expo-symbols";
 import { AppleIcon } from "react-native-bottom-tabs";
+import { generalIconParams, iosIconParams } from "@/shared/types/icons";
 
 // This code will be removed, I was testing if finnaly the react-native-vector-icons/ionicons library worked
 const source = Icon.getImageSourceSync("home", 30, "red");
@@ -15,20 +16,19 @@ const iconSize: number = 30;
 const iconActiveColor: string = Colors.primary;
 const iconInactiveColor: string = Colors.dark;
 
-interface iosIconParams {
-  size: number;
-  activeAppleIcon: AppleIcon;
-  inactiveAppleIcon: AppleIcon;
-}
+const calendarGeneralIconParams: generalIconParams = {
+  size: iconSize,
+  activeIconUri: Icon.getImageSourceSync("calendar-clear")?.uri,
+  activeIconUri: Icon.getImageSourceSync("calendar-clear")?.uri,
+  activeColor: Colors.primary,
+  inactiveColor: Colors.dark,
+};
 
-// TODO fix types for IconUri so the names of the icons are suggested
-interface generalIconParams {
-  size: number;
-  activeIconUri: string;
-  inactiveIconUri: string;
-  activeColor: string;
-  inactiveColor: string;
-}
+const calendarIosIconParams: iosIconParams = {
+  size: iconSize,
+  activeAppleIcon: "calendar.circle.fill",
+  inactiveAppleIcon: "calendar.circle",
+};
 
 const TabLayout = () => {
   return (
