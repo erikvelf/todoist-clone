@@ -19,7 +19,7 @@ const iconInactiveColor: string = Colors.dark;
 const calendarGeneralIconParams: generalIconParams = {
   size: iconSize,
   activeIconUri: Icon.getImageSourceSync("calendar-clear")?.uri,
-  activeIconUri: Icon.getImageSourceSync("calendar-clear")?.uri,
+  activeIconUri: Icon.getImageSourceSync("calendar-outline")?.uri,
   activeColor: Colors.primary,
   inactiveColor: Colors.dark,
 };
