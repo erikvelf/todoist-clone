@@ -37,13 +37,6 @@ const TabLayout = () => {
       tabBarInactiveTintColor={Colors.dark}
     >
       <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: () => ({ uri: source?.uri }),
-        }}
-      />
-      <Tabs.Screen
         name="today"
         options={{
           title: "Today",
