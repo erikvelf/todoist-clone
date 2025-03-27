@@ -16,6 +16,23 @@ const iconSize: number = 30;
 const iconActiveColor: string = Colors.primary;
 const iconInactiveColor: string = Colors.dark;
 
+const getIcon = (
+  platform: string,
+  isFocused: boolean,
+  iosIconParams: iosIconParams,
+  generalIconParams: generalIconParams,
+) => {
+  if (platform === "ios") {
+    return isFocused
+      ? iosIconParams.activeAppleIcon
+      : iosIconParams.inactiveAppleIcon;
+  }
+
+  return isFocused
+    ? { uri: generalIconParams.activeIconUri }
+    : { uri: generalIconParams.inactiveIconUri };
+};
+
 const calendarGeneralIconParams: generalIconParams = {
   size: iconSize,
   activeIconUri: Icon.getImageSourceSync("calendar-clear")?.uri,
