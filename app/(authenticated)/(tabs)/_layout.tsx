@@ -12,6 +12,7 @@ const source = Icon.getImageSourceSync("home", 30, "red");
 console.log(source?.uri);
 //
 
+const platform = Platform.OS;
 const iconSize: number = 30;
 const iconActiveColor: string = Colors.primary;
 const iconInactiveColor: string = Colors.dark;
@@ -21,7 +22,7 @@ const getIcon = (
   isFocused: boolean,
   iosIconParams: iosIconParams,
   generalIconParams: generalIconParams,
-) => {
+): ImageSourcePropType | AppleIcon => {
   if (platform === "ios") {
     return isFocused
       ? iosIconParams.activeAppleIcon
@@ -57,9 +58,13 @@ const TabLayout = () => {
         name="today"
         options={{
           title: "Today",
-          tabBarIcon: ({ focused }) => ({
-            sfSymbol: focused ? "calendar.circle.fill" : "calendar.circle.fill",
-          }),
+          tabBarIcon: ({ focused }) =>
+            getIcon(
+              platform,
+              focused,
+              calendarIosIconParams,
+              calendarGeneralIconParams,
+            ),
         }}
       />
       <Tabs.Screen
