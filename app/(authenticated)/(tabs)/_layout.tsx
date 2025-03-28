@@ -48,6 +48,13 @@ const calendarIosIconParams: iosIconParams = {
   inactiveAppleIcon: "calendar.circle",
 };
 
+const calendarIcon = getIcon(
+  platform,
+  true,
+  calendarIosIconParams,
+  calendarGeneralIconParams,
+);
+
 const TabLayout = () => {
   return (
     <Tabs
@@ -58,13 +65,7 @@ const TabLayout = () => {
         name="today"
         options={{
           title: "Today",
-          tabBarIcon: ({ focused }) =>
-            getIcon(
-              platform,
-              focused,
-              calendarIosIconParams,
-              calendarGeneralIconParams,
-            ),
+          tabBarIcon: ({ focused }) => calendarIcon,
         }}
       />
       <Tabs.Screen
