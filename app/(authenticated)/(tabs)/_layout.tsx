@@ -48,11 +48,32 @@ const calendarIosIconParams: iosIconParams = {
   inactiveAppleIcon: "calendar.circle",
 };
 
+const upcomingGeneralIconParams: generalIconParams = {
+  size: iconSize,
+  activeIconUri: Icon.getImageSourceSync("calendar-number")?.uri,
+  activeIconUri: Icon.getImageSourceSync("calendar-number-outline")?.uri,
+  activeColor: Colors.primary,
+  inactiveColor: Colors.dark,
+};
+
+const upcomingIosIconParams: iosIconParams = {
+  size: iconSize,
+  activeAppleIcon: "calendar.circle.fill",
+  inactiveAppleIcon: "calendar.circle",
+};
+
 const calendarIcon = getIcon(
   platform,
   true,
   calendarIosIconParams,
   calendarGeneralIconParams,
+);
+
+const upcomingIcon = getIcon(
+  platform,
+  true,
+  upcomingIosIconParams,
+  upcomingGeneralIconParams,
 );
 
 const TabLayout = () => {
@@ -72,9 +93,7 @@ const TabLayout = () => {
         name="upcoming"
         options={{
           title: "Upcoming",
-          tabBarIcon: () => ({
-            sfSymbol: "calendar",
-          }),
+          tabBarIcon: () => upcomingIcon,
         }}
       />
 
