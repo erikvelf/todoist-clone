@@ -62,6 +62,21 @@ const upcomingIosIconParams: iosIconParams = {
   inactiveAppleIcon: "calendar.circle",
 };
 
+const searchGeneralIconParams: generalIconParams = {
+  size: iconSize,
+  activeIconUri: Icon.getImageSourceSync("search-outline")?.uri,
+  activeIconUri: Icon.getImageSourceSync("search")?.uri,
+  activeColor: Colors.primary,
+  inactiveColor: Colors.dark,
+};
+
+const searchIosIconParams: iosIconParams = {
+  size: iconSize,
+  activeAppleIcon: "text.magnifyingglass",
+  inactiveAppleIcon: "magnifyingglass",
+};
+
+// ICONS ---------------------------
 const calendarIcon = getIcon(
   platform,
   true,
@@ -74,6 +89,13 @@ const upcomingIcon = getIcon(
   true,
   upcomingIosIconParams,
   upcomingGeneralIconParams,
+);
+
+const searchIcon = getIcon(
+  platform,
+  true,
+  searchIosIconParams,
+  searchGeneralIconParams,
 );
 
 const TabLayout = () => {
@@ -101,9 +123,7 @@ const TabLayout = () => {
         name="search"
         options={{
           title: "Search",
-          tabBarIcon: ({ focused }) => ({
-            sfSymbol: focused ? "text.magnifyingglass" : "magnifyingglass",
-          }),
+          tabBarIcon: ({ focused }) => searchIcon,
         }}
       />
 
