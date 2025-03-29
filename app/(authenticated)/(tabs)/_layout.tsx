@@ -76,6 +76,20 @@ const searchIosIconParams: iosIconParams = {
   inactiveAppleIcon: "magnifyingglass",
 };
 
+const browseGeneralIconParams: generalIconParams = {
+  size: iconSize,
+  activeIconUri: Icon.getImageSourceSync("browsers-outline")?.uri,
+  activeIconUri: Icon.getImageSourceSync("browsers")?.uri,
+  activeColor: Colors.primary,
+  inactiveColor: Colors.dark,
+};
+
+const browseIosIconParams: iosIconParams = {
+  size: iconSize,
+  activeAppleIcon: "doc.text.image.fill",
+  inactiveAppleIcon: "doc.text.image",
+};
+
 // ICONS ---------------------------
 const calendarIcon = getIcon(
   platform,
@@ -96,6 +110,13 @@ const searchIcon = getIcon(
   true,
   searchIosIconParams,
   searchGeneralIconParams,
+);
+
+const browseIcon = getIcon(
+  platform,
+  true,
+  browseIosIconParams,
+  browseGeneralIconParams,
 );
 
 const TabLayout = () => {
@@ -131,9 +152,7 @@ const TabLayout = () => {
         name="browse"
         options={{
           title: "Browse",
-          tabBarIcon: ({ focused }) => ({
-            sfSymbol: focused ? "doc.text.image.fill" : "doc.text.image",
-          }),
+          tabBarIcon: ({ focused }) => browseIcon,
         }}
       />
     </Tabs>
