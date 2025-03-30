@@ -124,6 +124,8 @@ const TabLayout = () => {
     <Tabs
       tabBarActiveTintColor={Colors.primary}
       tabBarInactiveTintColor={Colors.dark}
+      hapticFeedbackEnabled={true}
+      ignoresTopSafeArea={true}
     >
       <Tabs.Screen
         name="today"
