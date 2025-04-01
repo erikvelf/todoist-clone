@@ -1,6 +1,6 @@
+import MoreButton from "@/components/MoreButton";
 import { Colors } from "@/constants/Colors";
 import { Stack } from "expo-router";
-import { Button } from "react-native";
 
 const Layout = () => {
   return (
@@ -16,7 +16,7 @@ const Layout = () => {
         options={{
           title: "Today",
           headerLargeTitle: true,
-          headerRight: () => <Button title="headerButton" />,
+          headerRight: () => <MoreButton />,
         }}
       />
     </Stack>
