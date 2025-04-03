@@ -45,7 +45,7 @@ const InitialLayout = () => {
 
     if (isSignedIn && !iAuthGroup) {
       router.replace("/(authenticated)/(tabs)/today");
-    } else if (!isSignedIn && pathName === "/") {
+    } else if (!isSignedIn && pathName != "/") {
       router.replace("/");
     }
   }, [isLoaded, isSignedIn]);
