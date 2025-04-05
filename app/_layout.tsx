@@ -80,8 +80,8 @@ const RootLayout = () => {
       <StatusBar style="dark" />
       <ClerkLoaded>
         <GestureHandlerRootView style={{ flex: 1 }}>
-          <Toaster />
           <InitialLayout />
+          <Toaster />
         </GestureHandlerRootView>
       </ClerkLoaded>
     </ClerkProvider>
