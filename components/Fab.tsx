@@ -1,25 +1,20 @@
 import { Colors } from "@/constants/Colors";
-import { Text, StyleSheet, TouchableOpacity } from "react-native";
-// import { toast } from "sonner-native/lib/typescript/commonjs/src/types";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { toast } from "sonner-native";
-
-import { Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
-
-console.log(Math.trunc(windowHeight), "window height");
+import { useRouter } from "expo-router";
+import * as Haptics from "expo-haptics";
 
 const Fab = () => {
+  const router = useRouter();
   const handlePress = () => {
-    toast.success("Fab pressed");
-    console.log("Fab pressed");
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push("/task/new");
   };
 
   return (
     <TouchableOpacity style={styles.fab} onPress={handlePress}>
       <Ionicons name="add" size={24} color="white" />
-      {/* <Text>+</Text> */}
     </TouchableOpacity>
   );
 };
