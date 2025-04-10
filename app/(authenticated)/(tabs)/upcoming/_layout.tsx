@@ -16,7 +16,7 @@ const Layout = () => {
         options={{
           title: "Upcoming",
           headerLargeTitle: true,
-          headerRight: () => <MoreButton />,
+          headerRight: () => <MoreButton pageName="Upcoming" />,
         }}
       />
     </Stack>
