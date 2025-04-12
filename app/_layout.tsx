@@ -1,3 +1,4 @@
+import React from "react";
 import {
   router,
   Stack,
@@ -9,10 +10,17 @@ import { tokenCache } from "@/utils/cache";
 import { Colors } from "@/constants/Colors";
 import { ActivityIndicator, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { ClerkProvider, ClerkLoaded, useAuth } from "@clerk/clerk-expo";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Toaster } from "sonner-native";
+import { SQLiteProvider } from "expo-sqlite"
+import { openDatabaseSync } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import migrations from "@/drizzle/migrations";
+import { addDummyData } from "@/utils/addDummyData";
+
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
@@ -75,17 +83,45 @@ const InitialLayout = () => {
 
 /* wrapping up in ClerkProvider with ClerkLoaded to ensure it is loaded */
 const RootLayout = () => {
+  const expoDb = openDatabaseSync("todos");
+  const db = drizzle(expoDb);
+  const {success, error} = useMigrations(db, migrations);
+  console.log("RootLayout ~ success", success);
+  console.log("RootLayout ~ error", error);
+
+  React.useEffect(() => {
+    if (!success) {
+      console.log("Adding dummy data");
+      addDummyData(db);
+    };
+
+    if (error) {
+      console.error(error);
+    }
+  }, [error]);
+
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <StatusBar style="dark" />
       <ClerkLoaded>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <InitialLayout />
-          <Toaster />
-        </GestureHandlerRootView>
+        <Suspense fallback={<Loading/>}>
+          <SQLiteProvider databaseName="todos" useSuspense options={{
+            enableChangeListener: true, // get live data from the database
+          }}>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <InitialLayout />
+              <Toaster />
+            </GestureHandlerRootView>
+          </SQLiteProvider>
+        </Suspense>
       </ClerkLoaded>
     </ClerkProvider>
   );
 };
 
+const Loading = () => {
+  return <ActivityIndicator size="large" color={Colors.primary} />
+}
+
 export default RootLayout;
+
