@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, SectionList } from "react-native";
 import Fab from "@/components/Fab";
 import { useSQLiteContext } from "expo-sqlite";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
@@ -10,6 +10,8 @@ import { useEffect } from "react";
 import { format } from "date-fns";
 import { Todo } from "@/types/interfaces";
 import { useState } from "react";
+import TaskRow from "@/components/TaskRow";
+import { Colors } from "@/constants/Colors";
 
 interface Section {
   title: string;
@@ -38,7 +40,6 @@ const Page = () => {
       project_name: item.projects?.name,
       project_color: item.projects?.color,
     }));
-    console.log("Page ~ formattedData", formattedData);
 
     // Group tasks by day
     const groupedByDay = formattedData?.reduce((acc: { [key: string]: Todo[] }, task) => {
@@ -51,13 +52,10 @@ const Page = () => {
       return acc;
     }, {})
 
-    console.log("Page ~ groupedByDay", groupedByDay);
-
     const listData: Section[] = Object.entries(groupedByDay || {}).map(([day, tasks]) => ({
       title: day,
       data: tasks,
     }));
-    console.log("Page ~ listData", listData);
 
     // Sort sections by date
     listData.sort((a, b) => {
@@ -67,6 +65,7 @@ const Page = () => {
     });
     console.log("Page ~ listData sorted", listData);
 
+    console.log(JSON.stringify(listData, null, 2));
 
     setSectionListData(listData);
 
@@ -74,7 +73,13 @@ const Page = () => {
 
   return (
     <View style={styles.container}>
-      <Text>Today</Text>
+      <SectionList
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+        sections={sectionListData}
+        renderItem={({ item }) => <TaskRow task={item} />}
+        renderSectionHeader={({ section }) => <Text style={styles.header}>{section.title}</Text>}
+      />
       <Fab />
     </View>
   );
@@ -85,4 +90,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    fontSize: 16,
+    backgroundColor: "#fff",
+    fontWeight: "bold",
+    padding: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.lightBorder,
+  }
 });
