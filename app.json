@@ -51,7 +51,15 @@
         }
       ],
       "expo-secure-store",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "todoist-clone",
+          "organization": "erikvelf-team"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

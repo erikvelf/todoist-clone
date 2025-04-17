@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, SectionList, RefreshControl } from "react-native";
+import { View, Text, StyleSheet, SectionList, RefreshControl, Button } from "react-native";
 import Fab from "@/components/Fab";
 import { useSQLiteContext } from "expo-sqlite";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
@@ -12,7 +12,7 @@ import { Todo } from "@/types/interfaces";
 import { useState } from "react";
 import TaskRow from "@/components/TaskRow";
 import { Colors } from "@/constants/Colors";
-
+import * as Sentry from '@sentry/react-native';
 interface Section {
   title: string;
   data: Todo[];
@@ -33,6 +33,9 @@ const Page = () => {
   )
 
   const [sectionListData, setSectionListData] = useState<Section[]>([]);
+  const erikError = () => {
+    throw new Error('Erik error');
+  }
 
   useEffect(() => {
     const formattedData: Todo[] = data?.map((item) => ({
@@ -81,6 +84,8 @@ const Page = () => {
         renderSectionHeader={({ section }) => <Text style={styles.header}>{section.title}</Text>}
         stickySectionHeadersEnabled={true}
       />
+      <Button title='Try!' onPress={ () => { Sentry.captureException(new Error('First error')) }}/>
+      <Button title='Erik error' onPress={erikError}/>
       <Fab />
     </View>
   );

@@ -20,6 +20,19 @@ import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from "@/drizzle/migrations";
 import { addDummyData } from "@/utils/addDummyData";
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: 'https://bb7de8f6a6b2a73a8e3bf491d6f06b06@o4509169417256960.ingest.de.sentry.io/4509169424007248',
+
+  // Configure Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [Sentry.mobileReplayIntegration()],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
 
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
@@ -123,5 +136,4 @@ const Loading = () => {
   return <ActivityIndicator size="large" color={Colors.primary} />
 }
 
-export default RootLayout;
-
+export default Sentry.wrap(RootLayout);
