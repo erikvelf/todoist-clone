@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, SectionList } from "react-native";
+import { View, Text, StyleSheet, SectionList, RefreshControl } from "react-native";
 import Fab from "@/components/Fab";
 import { useSQLiteContext } from "expo-sqlite";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
@@ -79,6 +79,7 @@ const Page = () => {
         sections={sectionListData}
         renderItem={({ item }) => <TaskRow task={item} />}
         renderSectionHeader={({ section }) => <Text style={styles.header}>{section.title}</Text>}
+        stickySectionHeadersEnabled={true}
       />
       <Fab />
     </View>
