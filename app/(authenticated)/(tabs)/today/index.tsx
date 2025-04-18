@@ -41,6 +41,15 @@ const Page = () => {
       project_color: item.projects?.color,
     }));
 
+    /*
+    The reduce function is building an object (acc) where each key is a day (like "10 Jul ' Wed") and the value associated with that key should be a list (an array) of all tasks due on that day.
+    The if (!acc[day]) check determines if this is the first time the code has encountered a task for this particular day.
+    If it is the first time (!acc[day] is true), the code needs to create a place to store the tasks for that day within the acc object.
+    acc[day] = [] creates the property day on the acc object and sets its initial value to an empty array.
+    This prepares the list so that the current task (and any future tasks found for the same day) can be added to it using acc[day].push(task).
+    Without this line, the subsequent acc[day].push(task) would fail because acc[day] wouldn't exist or wouldn't be an array the first time a task for that day is processed.
+    */
+
     // Group tasks by day
     const groupedByDay = formattedData?.reduce((acc: { [key: string]: Todo[] }, task) => {
       // format the date to be like this: 15 April · Mon
