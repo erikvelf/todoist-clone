@@ -2,6 +2,7 @@ import React from "react";
 import {
   router,
   Stack,
+  useNavigationContainerRef,
   usePathname,
   useRouter,
   useSegments,
@@ -22,16 +23,30 @@ import migrations from "@/drizzle/migrations";
 import { addDummyData } from "@/utils/addDummyData";
 import * as Sentry from '@sentry/react-native';
 
+
+const navigationIntegration = Sentry.reactNavigationIntegration({
+  enableTimeToInitialDisplay: true,
+});
+
 Sentry.init({
   dsn: 'https://bb7de8f6a6b2a73a8e3bf491d6f06b06@o4509169417256960.ingest.de.sentry.io/4509169424007248',
+  attachScreenshot: true,
+  tracesSampleRate: 1.0, // do profiling, change for production to a lower value
 
-  // Configure Session Replay
-  replaysSessionSampleRate: 0.1,
+  // Configure Session Replayjj
+  replaysSessionSampleRate: 0.1, // for development, set to 1 to capture all sessions
   replaysOnErrorSampleRate: 1,
-  integrations: [Sentry.mobileReplayIntegration()],
+  integrations: [
+    Sentry.mobileReplayIntegration({
+      maskAllText: true,
+      maskAllVectors: false,
+      maskAllImages: false,
+    }),
+  ],
+
 
   // uncomment the line below to enable Spotlight (https://spotlightjs.com)
-  // spotlight: __DEV__,
+  spotlight: __DEV__,
 });
 
 
@@ -96,6 +111,12 @@ const InitialLayout = () => {
 
 /* wrapping up in ClerkProvider with ClerkLoaded to ensure it is loaded */
 const RootLayout = () => {
+  const ref = useNavigationContainerRef();
+  useEffect(() => {
+    navigationIntegration.registerNavigationContainer(ref);
+  }, [ref])
+  
+
   const expoDb = openDatabaseSync("todos");
   const db = drizzle(expoDb);
   const {success, error} = useMigrations(db, migrations);
