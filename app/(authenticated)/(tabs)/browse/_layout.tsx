@@ -12,11 +12,18 @@ const Layout = () => {
       <Stack.Screen
         name="index"
         options={{
-          title: " Browse",
+          title: "Browse",
           headerTitleAlign: "center",
           // headerLargeTitle: true,
           headerLeft: () => <HeaderLeft />,
           headerRight: () => <HeaderRight />,
+        }}
+      />
+      <Stack.Screen
+        name="new-project"
+        options={{
+          headerShown: false,
+          presentation: "modal",
         }}
       />
     </Stack>
