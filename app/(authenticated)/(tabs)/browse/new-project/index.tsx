@@ -23,6 +23,7 @@ const Page = () => {
     if (bg) {
       setSelectedColor(bg);
     }
+    setBg('')
   }, [bg]);
 
   const onCreateProject = async () => {
@@ -30,6 +31,7 @@ const Page = () => {
       name: projectName,
       color: selectedColor,
     });
+    setSelectedColor(DEFAULT_PROJECT_COLOR)
     router.dismiss() // go back to the previous screen after selection
   }
 
