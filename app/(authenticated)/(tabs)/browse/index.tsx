@@ -5,7 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { View, Text, Button, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, Button, StyleSheet, TouchableOpacity} from "react-native";
+import Animated, { CurvedTransition, LinearTransition } from "react-native-reanimated";
 import Fab from "@/components/Fab";
 import React from "react";
 import {Colors} from "@/constants/Colors";
@@ -44,9 +45,9 @@ const Page = () => {
           </TouchableOpacity>
         </View>
         {/* Using FlatList will render only what is visible on the screen unlike the ScrollView */}
-        <FlatList
+        <Animated.FlatList
           data={data}
-
+          itemLayoutAnimation={CurvedTransition}
           renderItem={({item}) => (
             <ContextMenu.Root key={item.id}>
               <ContextMenu.Trigger>
