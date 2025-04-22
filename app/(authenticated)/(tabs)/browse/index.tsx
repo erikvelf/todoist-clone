@@ -5,14 +5,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { View, Text, Button, StyleSheet, TouchableOpacity} from "react-native";
-import Animated, { CurvedTransition, LinearTransition } from "react-native-reanimated";
+import { View, Text, StyleSheet, TouchableOpacity} from "react-native";
+import Animated, { CurvedTransition } from "react-native-reanimated";
 import Fab from "@/components/Fab";
 import React from "react";
 import {Colors} from "@/constants/Colors";
-import { FlatList } from "react-native-gesture-handler";
 import * as ContextMenu from "zeego/context-menu";
-import { Item } from "zeego/context-menu";
 
 const Page = () => {
   const { signOut } = useAuth();
@@ -20,6 +18,8 @@ const Page = () => {
   const db = useSQLiteContext();
   const drizzleDb = drizzle(db);
   const {data} = useLiveQuery(drizzleDb.select().from(projects), [])
+  const FREE_PROJECTS_LIMIT = 6;
+  // TODO: implement subscription
   const isPro = false;
 
   const onDeleteProject = async (id: number) => {
@@ -27,7 +27,7 @@ const Page = () => {
   }
 
   const onNewProject = async () => {
-    if (data.length >= 5 && !isPro) {
+    if (data.length >= FREE_PROJECTS_LIMIT && !isPro) {
       // show go pro modal
       
     } else {
