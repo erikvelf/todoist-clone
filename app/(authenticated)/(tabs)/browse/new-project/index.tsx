@@ -1,7 +1,7 @@
 import { Colors, DEFAULT_PROJECT_COLOR } from "@/constants/Colors";
 import { projects } from "@/db/schema";
 import { drizzle } from "drizzle-orm/expo-sqlite";
-import { Link, router, Stack, useLocalSearchParams } from "expo-router";
+import { Link, useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, TextInput } from "react-native";
@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMMKVString } from 'react-native-mmkv';
 
 const Page = () => {
+  const router = useRouter();
   const [projectName, setProjectName] = useState("");
   // const { bg } = useLocalSearchParams<{ bg: string }>(); // doesn't work, so we use key value storage
   const [selectedColor, setSelectedColor] = useState<string>(DEFAULT_PROJECT_COLOR);

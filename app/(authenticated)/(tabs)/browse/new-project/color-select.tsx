@@ -1,5 +1,5 @@
 import { PROJECT_COLORS, DEFAULT_PROJECT_COLOR } from '@/constants/Colors';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMMKVString } from 'react-native-mmkv';
 
 const Page = () => {
+  const router = useRouter();
   const [selected, setSelected] = useState<string>(DEFAULT_PROJECT_COLOR);
   const headerHeight = useHeaderHeight();
   const [bg, setBg] = useMMKVString('bg')

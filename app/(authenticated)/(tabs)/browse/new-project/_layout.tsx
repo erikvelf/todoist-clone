@@ -1,8 +1,9 @@
-import { Stack, router } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { Button, Platform, View } from "react-native";
 
 const Layout = () => {
+  const router = useRouter();
   return (
     <Stack screenOptions={{
       headerShadowVisible: false,
