@@ -1,5 +1,5 @@
 import { Tabs } from "@/components/Tabs";
-import { ImageSourcePropType, Platform } from "react-native";
+import { ImageSourcePropType, Platform, Keyboard, StyleSheet, View, Text } from "react-native";
 import Icon from "@react-native-vector-icons/ionicons";
 // import { name as ionicIconsName } from "@react-native-vector-icons/ionicons" // TODO figure out how to get ionicicons IconUri parameters for generalIconsParams
 import { Colors } from "@/constants/Colors";
@@ -7,6 +7,10 @@ import { Colors } from "@/constants/Colors";
 // import { SFSymbol } from "expo-symbols";
 import { AppleIcon } from "react-native-bottom-tabs";
 import { generalIconParams, iosIconParams } from "@/shared/types/icons";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import BottomSheet, { BottomSheetView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import { BottomSheetProvider, useBottomSheet } from '@/context/BottomSheetContext';
+import { useMemo } from "react";
 
 const platform = Platform.OS;
 const iconSize: number = 30;
@@ -14,6 +18,7 @@ const iconSize: number = 30;
 // const iconActiveColor: string = Colors.primary;
 // const iconInactiveColor: string = Colors.dark;
 
+ 
 
 /**
  * Gets the appropriate icon configuration based on the platform and focus state.
@@ -125,45 +130,109 @@ const browseIcon = getIcon(
 );
 
 const TabLayout = () => {
+  const { bottomSheetRef } = useBottomSheet();
+
+  const snapPoints = useMemo(() => ['25%', '30%'], []);
+
   return (
-    <Tabs
-      tabBarActiveTintColor={Colors.primary}
-      tabBarInactiveTintColor={Colors.dark}
-      hapticFeedbackEnabled={true}
-      ignoresTopSafeArea={true}
-    >
-      <Tabs.Screen
-        name="today"
-        options={{
-          title: "Today",
-          tabBarIcon: ({ focused }) => calendarIcon,
-        }}
-      />
-      <Tabs.Screen
-        name="upcoming"
-        options={{
-          title: "Upcoming",
-          tabBarIcon: () => upcomingIcon,
-        }}
-      />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Tabs
+        tabBarActiveTintColor={Colors.primary}
+        tabBarInactiveTintColor={Colors.dark}
+        hapticFeedbackEnabled={true}
+        ignoresTopSafeArea={true}
+      >
+        <Tabs.Screen
+          name="today"
+          options={{
+            title: "Today",
+            tabBarIcon: ({ focused }) => calendarIcon,
+          }}
+        />
+        <Tabs.Screen
+          name="upcoming"
+          options={{
+            title: "Upcoming",
+            tabBarIcon: () => upcomingIcon,
+          }}
+        />
 
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: "Search",
-          tabBarIcon: ({ focused }) => searchIcon,
-        }}
-      />
+        <Tabs.Screen
+          name="search"
+          options={{
+            title: "Search",
+            tabBarIcon: ({ focused }) => searchIcon,
+          }}
+        />
 
-      <Tabs.Screen
-        name="browse"
-        options={{
-          title: "Browse",
-          tabBarIcon: ({ focused }) => browseIcon,
-        }}
-      />
-    </Tabs>
+        <Tabs.Screen
+          name="browse"
+          options={{
+            title: "Browse",
+            tabBarIcon: ({ focused }) => browseIcon,
+          }}
+        />
+      </Tabs>
+      <BottomSheet
+        style={styles.bottomSheet}
+        ref={bottomSheetRef}
+        index={-1}
+        snapPoints={snapPoints}
+        enablePanDownToClose={true}
+        handleIndicatorStyle={{ backgroundColor: Colors.lightBorder }}
+        backgroundStyle={{ backgroundColor: Colors.backgroundAlt }}
+      >
+        <BottomSheetView style={styles.bottomSheetContent}>
+          <BottomSheetTextInput
+            placeholder="Task name"
+            style={styles.input}
+            placeholderTextColor={Colors.lightText}
+            cursorColor={Colors.primary}
+          />
+          <BottomSheetTextInput
+            placeholder="Description (optional)"
+            style={[styles.input, styles.descriptionInput]}
+            placeholderTextColor={Colors.lightText}
+            cursorColor={Colors.primary}
+            multiline={true}
+          />
+        </BottomSheetView>
+      </BottomSheet>
+    </GestureHandlerRootView>
   );
 };
 
-export default TabLayout;
+const TabLayoutWrapper = () => (
+  <BottomSheetProvider>
+    <TabLayout />
+  </BottomSheetProvider>
+);
+
+export default TabLayoutWrapper;
+
+const styles = StyleSheet.create({
+  bottomSheetContent: {
+    flex: 1,
+    padding: 24,
+    backgroundColor: Colors.backgroundAlt,
+  },
+  input: {
+    marginTop: 16,
+    height: 44,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.lightBorder,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: Colors.dark,
+    backgroundColor: Colors.background,
+  },
+  descriptionInput: {
+    height: 100,
+    textAlignVertical: 'top',
+    paddingTop: 12,
+  },
+  bottomSheet: {
+    // backgroundColor: Colors.backgroundAlt,
+  },
+});
