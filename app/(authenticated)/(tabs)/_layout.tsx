@@ -1,5 +1,5 @@
 import { Tabs } from "@/components/Tabs";
-import { ImageSourcePropType, Platform, Keyboard, StyleSheet, View, Text } from "react-native";
+import { ImageSourcePropType, Platform, Keyboard, StyleSheet, View, Text, Dimensions, Button } from "react-native";
 import Icon from "@react-native-vector-icons/ionicons";
 // import { name as ionicIconsName } from "@react-native-vector-icons/ionicons" // TODO figure out how to get ionicicons IconUri parameters for generalIconsParams
 import { Colors } from "@/constants/Colors";
@@ -8,9 +8,9 @@ import { Colors } from "@/constants/Colors";
 import { AppleIcon } from "react-native-bottom-tabs";
 import { generalIconParams, iosIconParams } from "@/shared/types/icons";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import BottomSheet, { BottomSheetView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetView, BottomSheetTextInput, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { BottomSheetProvider, useBottomSheet } from '@/context/BottomSheetContext';
-import { useMemo } from "react";
+import { useMemo, useRef, useCallback, ElementRef } from "react";
 
 const platform = Platform.OS;
 const iconSize: number = 30;
@@ -129,10 +129,29 @@ const browseIcon = getIcon(
   browseGeneralIconParams,
 );
 
+const snapPoints = ['30%'];
+const bottomSheetHeight = Dimensions.get('window').height * 0.4;
+
 const TabLayout = () => {
   const { bottomSheetRef } = useBottomSheet();
+  const taskNameInputRef = useRef<ElementRef<typeof BottomSheetTextInput>>(null);
 
-  const snapPoints = useMemo(() => ['25%', '30%'], []);
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log('handleSheetChanges', index);
+    if (index >= 0) {
+      taskNameInputRef.current?.focus();
+    }
+
+    if (index === -1) {
+      Keyboard.dismiss();
+      bottomSheetRef.current?.close();
+    }
+  }, []);
+
+  const handleTaskNameSubmit = () => {
+    bottomSheetRef.current?.close();
+    Keyboard.dismiss();
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -181,13 +200,26 @@ const TabLayout = () => {
         enablePanDownToClose={true}
         handleIndicatorStyle={{ backgroundColor: Colors.lightBorder }}
         backgroundStyle={{ backgroundColor: Colors.backgroundAlt }}
+        onChange={handleSheetChanges}
+        enableDynamicSizing={false} // because we set the height manually
+        backdropComponent={props => (
+          <BottomSheetBackdrop
+            {...props}
+            disappearsOnIndex={-1}        // hide backdrop when sheet is closed
+            appearsOnIndex={ 0 }          // show backdrop starting at index 0
+            pressBehavior="close"         // tap backdrop to close
+          />
+        )}
+        enableHandlePanningGesture={false}
       >
         <BottomSheetView style={styles.bottomSheetContent}>
           <BottomSheetTextInput
+            ref={taskNameInputRef}
             placeholder="Task name"
             style={styles.input}
             placeholderTextColor={Colors.lightText}
             cursorColor={Colors.primary}
+            onSubmitEditing={handleTaskNameSubmit}
           />
           <BottomSheetTextInput
             placeholder="Description (optional)"

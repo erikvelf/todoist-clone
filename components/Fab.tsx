@@ -7,12 +7,10 @@ import * as Haptics from "expo-haptics";
 import { useBottomSheet } from "@/context/BottomSheetContext";
 
 const Fab = () => {
-  // const router = useRouter(); // Remove or comment out if navigation is no longer needed here
   const { bottomSheetRef } = useBottomSheet(); // Get ref from context
 
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // router.push("/task/new"); // Replace navigation with bottom sheet expansion
     bottomSheetRef.current?.expand(); // Expand the bottom sheet to the first snap point
   };
 
