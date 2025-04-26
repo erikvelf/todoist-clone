@@ -1,5 +1,4 @@
 import { AppleIcon } from "react-native-bottom-tabs";
-import { ImageSourcePropType } from "react-native";
 
 export interface iosIconParams {
   size: number;
@@ -16,4 +15,6 @@ export interface generalIconParams {
   size: number;
   /** The URI for the base (usually inactive/outline) icon. Must be generated using Icon.getImageSourceSync. */
   iconUri: string | undefined;
+  /** The URI for the inactive icon. Must be generated using Icon.getImageSourceSync. */
+  inactiveIconUri: string | undefined;
 }
