@@ -39,13 +39,32 @@ const TabLayout = ({ todo }: TodoFormProps) => {
   const { bottomSheetRef } = useBottomSheet();
   const taskNameInputRef = useRef<ElementRef<typeof BottomSheetTextInput>>(null);
 
+  const { control, handleSubmit, reset } = useForm<TodoFormData>({
+    defaultValues: {
+      name: todo?.name || '',
+      description: todo?.description || ''
+    }
+  });
+
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index);
     if (index >= 0) {
       taskNameInputRef.current?.focus();
+    } else {
+      // Reset form when sheet closes
+      reset();
+      Keyboard.dismiss();
     }
-  }, []);
+  }, [reset]);
 
+  const onSubmit: SubmitHandler<TodoFormData> = (data) => {
+    console.log("Form Data:", data);
+    // --- TODO: Add logic to save the task --- 
+    // e.g., call an API, update database
+
+    Keyboard.dismiss();
+    bottomSheetRef.current?.close();
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -55,6 +74,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
         hapticFeedbackEnabled={true}
         ignoresTopSafeArea={true}
         labeled
+        
       >
         <Tabs.Screen
           name="today"
@@ -89,13 +109,12 @@ const TabLayout = ({ todo }: TodoFormProps) => {
       </Tabs>
 
       <BottomSheet
-        style={styles.bottomSheet}
         ref={bottomSheetRef}
         index={-1}
         snapPoints={snapPoints}
         enablePanDownToClose={true}
         handleIndicatorStyle={{ backgroundColor: Colors.lightBorder }}
-        backgroundStyle={{ backgroundColor: Colors.backgroundAlt }}
+        backgroundStyle={{ backgroundColor: Colors.background }}
         onChange={handleSheetChanges}
         enableDynamicSizing={false} // because we set the height manually
         backdropComponent={props => (
@@ -103,25 +122,66 @@ const TabLayout = ({ todo }: TodoFormProps) => {
             {...props}
             disappearsOnIndex={-1}        // hide backdrop when sheet is closed
             appearsOnIndex={ 0 }          // show backdrop starting at index 0
-            pressBehavior="close"         // tap backdrop to close
+            pressBehavior="close"
           />
         )}
-        enableHandlePanningGesture={false}
+        // enableHandlePanningGesture={false} // disable dragging to close
       >
+        <View style={styles.closeButtonContainer}>
+          <TouchableOpacity
+            onPress={() => {
+              Keyboard.dismiss();
+              bottomSheetRef.current?.close();
+            }}
+          >
+            <Icon
+              name="close-circle-outline"
+              size={32}
+              color={Colors.dark}
+            />
+          </TouchableOpacity>
+        </View>
         <BottomSheetView style={styles.bottomSheetContent}>
-          <BottomSheetTextInput
-            ref={taskNameInputRef}
-            placeholder="Task name"
-            style={styles.input}
-            placeholderTextColor={Colors.lightText}
-            cursorColor={Colors.primary}
+          <Controller
+            control={control}
+            rules={{
+              required: 'Task name is required', // Add validation rule
+            }}
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <BottomSheetTextInput
+                  ref={taskNameInputRef}
+                  placeholder="Name"
+                  style={styles.titleInput}
+                  placeholderTextColor={Colors.lightText}
+                  cursorColor={Colors.primary}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  onSubmitEditing={() => handleSubmit(onSubmit)} 
+                  autoCorrect={false}
+                />
+            )}
+            name="name"
           />
-          <BottomSheetTextInput
-            placeholder="Description (optional)"
-            style={[styles.input, styles.descriptionInput]}
-            placeholderTextColor={Colors.lightText}
-            cursorColor={Colors.primary}
-            multiline={true}
+
+          <Controller
+            control={control}
+            rules={{
+              // Add any validation rules for description if needed
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <BottomSheetTextInput
+                placeholder="Description"
+                style={styles.descriptionInput}
+                placeholderTextColor={Colors.lightText}
+                cursorColor={Colors.primary}
+                multiline={true}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+            name="description"
           />
         </BottomSheetView>
       </BottomSheet>
@@ -140,26 +200,42 @@ export default TabLayoutWrapper;
 const styles = StyleSheet.create({
   bottomSheetContent: {
     flex: 1,
-    padding: 24,
-    backgroundColor: Colors.backgroundAlt,
+    backgroundColor: Colors.background,
   },
-  input: {
-    marginTop: 16,
+  inputContainer: {
+
+  },
+  titleInput: {
     height: 44,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: Colors.lightBorder,
     borderRadius: 8,
     paddingHorizontal: 16,
-    fontSize: 16,
+    fontSize: 20,
     color: Colors.dark,
     backgroundColor: Colors.background,
   },
   descriptionInput: {
-    height: 100,
-    textAlignVertical: 'top',
-    paddingTop: 12,
+    height: 44,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.lightBorder,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    fontSize: 20,
+    color: Colors.dark,
+    backgroundColor: Colors.background,
   },
-  bottomSheet: {
-    // backgroundColor: Colors.backgroundAlt,
+  inputError: {
+    borderColor: 'red', // Highlight input with error
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  closeButtonContainer: {
+    alignItems: 'flex-end',
+    paddingHorizontal: 16,
   },
 });
+
