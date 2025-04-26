@@ -1,138 +1,41 @@
 import { Tabs } from "@/components/Tabs";
-import { ImageSourcePropType, Platform, Keyboard, StyleSheet, View, Text, Dimensions, Button } from "react-native";
+import { ImageSourcePropType, Platform, Keyboard, StyleSheet, View, Button, TouchableOpacity } from "react-native";
 import Icon from "@react-native-vector-icons/ionicons";
-// import { name as ionicIconsName } from "@react-native-vector-icons/ionicons" // TODO figure out how to get ionicicons IconUri parameters for generalIconsParams
 import { Colors } from "@/constants/Colors";
-// SFSymbol likely not needed directly
-// import { SFSymbol } from "expo-symbols";
 import { AppleIcon } from "react-native-bottom-tabs";
-import { generalIconParams, iosIconParams } from "@/shared/types/icons";
+import { generalIconParams, iosIconParams } from "@/types/icons";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView, BottomSheetTextInput, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { BottomSheetProvider, useBottomSheet } from '@/context/BottomSheetContext';
-import { useMemo, useRef, useCallback, ElementRef } from "react";
-
-const platform = Platform.OS;
-const iconSize: number = 30;
-// Removed unused color constants
-// const iconActiveColor: string = Colors.primary;
-// const iconInactiveColor: string = Colors.dark;
-
- 
-
-/**
- * Gets the appropriate icon configuration based on the platform and focus state.
- * For iOS, returns the specified active/inactive AppleIcon (SF Symbol).
- * For other platforms (e.g., Android), returns an object with the base icon URI.
- * Assumes the Tabs component will handle tinting for Android icons based on focus state.
- *
- * @param platform - The current platform ('ios', 'android', etc.).
- * @param isFocused - Whether the tab is currently focused (used only for iOS).
- * @param iosIconParams - Configuration for iOS icons (SF Symbols).
- * @param generalIconParams - Configuration for general icons (Android URI).
- * @returns The icon configuration (AppleIcon for iOS, ImageSourcePropType for others).
- */
-const getIcon = (
-  platform: string,
-  isFocused: boolean,
-  iosIconParams: iosIconParams,
-  generalIconParams: generalIconParams, // Updated type
-): ImageSourcePropType | AppleIcon => {
-  if (platform === "ios") {
-    return isFocused
-      ? iosIconParams.activeAppleIcon
-      : iosIconParams.inactiveAppleIcon;
-  }
-
-  // For Android/other platforms, return the single base icon URI object
-  // The Tabs component is expected to apply tabBarActive/InactiveTintColor
-  // Add simple check for uri existence
-  return { uri: generalIconParams.iconUri || "" };
-};
-
-// --- Define Icon Params ---
-
-// Calendar
-const calendarGeneralIconParams: generalIconParams = {
-  size: iconSize,
-  // Use the outline/base version. Provide size/color needed by sync call, but color won't be used by Tabs.
-  iconUri: Icon.getImageSourceSync("calendar-outline", iconSize)?.uri,
-};
-
-const calendarIosIconParams: iosIconParams = {
-  size: iconSize,
-  activeAppleIcon: { sfSymbol: "calendar.circle.fill" },
-  inactiveAppleIcon: { sfSymbol: "calendar.circle" },
-};
-
-// Upcoming
-const upcomingGeneralIconParams: generalIconParams = {
-  size: iconSize,
-  iconUri: Icon.getImageSourceSync("calendar-number-outline", iconSize)?.uri,
-};
-
-const upcomingIosIconParams: iosIconParams = {
-  size: iconSize,
-  activeAppleIcon: { sfSymbol: "calendar.circle.fill" },
-  inactiveAppleIcon: { sfSymbol: "calendar.circle" },
-};
-
-// Search
-const searchGeneralIconParams: generalIconParams = {
-  size: iconSize,
-  iconUri: Icon.getImageSourceSync("search", iconSize)?.uri,
-};
-
-const searchIosIconParams: iosIconParams = {
-  size: iconSize,
-  activeAppleIcon: { sfSymbol: "text.magnifyingglass" }, // More specific search icon
-  inactiveAppleIcon: { sfSymbol: "magnifyingglass" },
-};
-
-// Browse
-const browseGeneralIconParams: generalIconParams = {
-  size: iconSize,
-  iconUri: Icon.getImageSourceSync("browsers-outline", iconSize)?.uri,
-};
-const browseIosIconParams: iosIconParams = {
-  size: iconSize,
-  activeAppleIcon: { sfSymbol: "doc.text.image.fill" },
-  inactiveAppleIcon: { sfSymbol: "doc.text.image" },
-};
-
-// ICONS ---------------------------
-const calendarIcon = getIcon(
-  platform,
-  true,
+import { useRef, useCallback, ElementRef } from "react";
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { Todo } from "@/types/interfaces";
+import { getIcon,
   calendarIosIconParams,
   calendarGeneralIconParams,
-);
-
-const upcomingIcon = getIcon(
-  platform,
-  true,
   upcomingIosIconParams,
-  upcomingGeneralIconParams,
-);
-
-const searchIcon = getIcon(
-  platform,
-  true,
   searchIosIconParams,
-  searchGeneralIconParams,
-);
-
-const browseIcon = getIcon(
-  platform,
-  true,
   browseIosIconParams,
-  browseGeneralIconParams,
-);
+  upcomingGeneralIconParams,
+  searchGeneralIconParams,
+  browseGeneralIconParams
+} from "@/utils/icons";
 
+const platform = Platform.OS;
 const snapPoints = ['30%'];
-const bottomSheetHeight = Dimensions.get('window').height * 0.4;
 
-const TabLayout = () => {
+interface TodoFormData {
+  name: string;
+  description?: string;
+}
+
+interface TodoFormProps {
+  todo?: Todo & {project_id: string, project_name: string, project_color: string};
+}
+
+const TabLayout = ({ todo }: TodoFormProps) => {
   const { bottomSheetRef } = useBottomSheet();
   const taskNameInputRef = useRef<ElementRef<typeof BottomSheetTextInput>>(null);
 
@@ -141,17 +44,8 @@ const TabLayout = () => {
     if (index >= 0) {
       taskNameInputRef.current?.focus();
     }
-
-    if (index === -1) {
-      Keyboard.dismiss();
-      bottomSheetRef.current?.close();
-    }
   }, []);
 
-  const handleTaskNameSubmit = () => {
-    bottomSheetRef.current?.close();
-    Keyboard.dismiss();
-  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -160,19 +54,20 @@ const TabLayout = () => {
         tabBarInactiveTintColor={Colors.dark}
         hapticFeedbackEnabled={true}
         ignoresTopSafeArea={true}
+        labeled
       >
         <Tabs.Screen
           name="today"
           options={{
             title: "Today",
-            tabBarIcon: ({ focused }) => calendarIcon,
+            tabBarIcon: ({ focused }) => getIcon(platform, focused, calendarIosIconParams, calendarGeneralIconParams),
           }}
         />
         <Tabs.Screen
           name="upcoming"
           options={{
             title: "Upcoming",
-            tabBarIcon: () => upcomingIcon,
+            tabBarIcon: ({ focused }) => getIcon(platform, focused, upcomingIosIconParams, upcomingGeneralIconParams),
           }}
         />
 
@@ -180,7 +75,7 @@ const TabLayout = () => {
           name="search"
           options={{
             title: "Search",
-            tabBarIcon: ({ focused }) => searchIcon,
+            tabBarIcon: ({ focused }) => getIcon(platform, focused, searchIosIconParams, searchGeneralIconParams),
           }}
         />
 
@@ -188,10 +83,11 @@ const TabLayout = () => {
           name="browse"
           options={{
             title: "Browse",
-            tabBarIcon: ({ focused }) => browseIcon,
+            tabBarIcon: ({ focused }) => getIcon(platform, focused, browseIosIconParams, browseGeneralIconParams),
           }}
         />
       </Tabs>
+
       <BottomSheet
         style={styles.bottomSheet}
         ref={bottomSheetRef}
@@ -219,7 +115,6 @@ const TabLayout = () => {
             style={styles.input}
             placeholderTextColor={Colors.lightText}
             cursorColor={Colors.primary}
-            onSubmitEditing={handleTaskNameSubmit}
           />
           <BottomSheetTextInput
             placeholder="Description (optional)"
