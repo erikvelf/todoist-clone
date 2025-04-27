@@ -1,17 +1,17 @@
 import { Tabs } from "@/components/Tabs";
-import { ImageSourcePropType, Platform, Keyboard, StyleSheet, View, Button, TouchableOpacity } from "react-native";
+import { Platform, Keyboard, StyleSheet, View, TouchableOpacity, Pressable, Text } from "react-native";
 import Icon from "@react-native-vector-icons/ionicons";
-import { Colors } from "@/constants/Colors";
-import { AppleIcon } from "react-native-bottom-tabs";
-import { generalIconParams, iosIconParams } from "@/types/icons";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import BottomSheet, { BottomSheetView, BottomSheetTextInput, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetView, BottomSheetTextInput, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { BottomSheetProvider, useBottomSheet } from '@/context/BottomSheetContext';
-import { useRef, useCallback, ElementRef } from "react";
+import { useRef, useCallback, ElementRef, useState } from "react";
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { Project, Todo } from "@/types/interfaces";
+import { projects } from "@/db/schema";
+import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
+
 import { useSQLiteContext } from "expo-sqlite";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { Todo } from "@/types/interfaces";
+import { Colors } from "@/constants/Colors";
 import { getIcon,
   calendarIosIconParams,
   calendarGeneralIconParams,
@@ -22,9 +22,8 @@ import { getIcon,
   searchGeneralIconParams,
   browseGeneralIconParams
 } from "@/utils/icons";
-
-const platform = Platform.OS;
-const snapPoints = ['30%'];
+import { Ionicons } from "@expo/vector-icons";
+import { Chip } from "@/components/Chip";
 
 interface TodoFormData {
   name: string;
@@ -35,11 +34,30 @@ interface TodoFormProps {
   todo?: Todo & {project_id: string, project_name: string, project_color: string};
 }
 
+const platform = Platform.OS;
+const snapPoints = ['30%'];
+
 const TabLayout = ({ todo }: TodoFormProps) => {
   const { bottomSheetRef } = useBottomSheet();
   const taskNameInputRef = useRef<ElementRef<typeof BottomSheetTextInput>>(null);
 
-  const { control, handleSubmit, reset } = useForm<TodoFormData>({
+  const db = useSQLiteContext();
+  const drizzleDb = drizzle(db);
+
+  const { data } = useLiveQuery(drizzleDb.select().from(projects))
+  const [selectedProject, setSelectedProject] = useState<Project>(
+    todo?.project_id ? {
+      id: todo.project_id,
+      name: todo.project_name,
+      color: todo.project_color
+    } : {
+      id: 1, // inbox
+      name: 'Inbox',
+      color: '#000000'
+    }
+  )
+
+  const { control, handleSubmit, reset, trigger } = useForm<TodoFormData>({
     defaultValues: {
       name: todo?.name || '',
       description: todo?.description || ''
@@ -47,7 +65,6 @@ const TabLayout = ({ todo }: TodoFormProps) => {
   });
 
   const handleSheetChanges = useCallback((index: number) => {
-    console.log('handleSheetChanges', index);
     if (index >= 0) {
       taskNameInputRef.current?.focus();
     } else {
@@ -58,7 +75,6 @@ const TabLayout = ({ todo }: TodoFormProps) => {
   }, [reset]);
 
   const onSubmit: SubmitHandler<TodoFormData> = (data) => {
-    console.log("Form Data:", data);
     // --- TODO: Add logic to save the task --- 
     // e.g., call an API, update database
 
@@ -109,6 +125,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
       </Tabs>
 
       <BottomSheet
+        style={styles.bottomSheet}
         ref={bottomSheetRef}
         index={-1}
         snapPoints={snapPoints}
@@ -141,7 +158,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
             />
           </TouchableOpacity>
         </View>
-        <BottomSheetView style={styles.bottomSheetContent}>
+        <BottomSheetView style={styles.bottomSheetInputs}>
           <Controller
             control={control}
             rules={{
@@ -183,7 +200,15 @@ const TabLayout = ({ todo }: TodoFormProps) => {
             )}
             name="description"
           />
+          <BottomSheetScrollView
+            horizontal
+            style={styles.actionButtonsContainer}>
+            <Chip icon="flag-outline" label="Priority" />
+            <Chip icon="calendar-outline" label="Due Date" />
+            <Chip icon="time-outline" label="Time" />
+          </BottomSheetScrollView>
         </BottomSheetView>
+
       </BottomSheet>
     </GestureHandlerRootView>
   );
@@ -198,32 +223,24 @@ const TabLayoutWrapper = () => (
 export default TabLayoutWrapper;
 
 const styles = StyleSheet.create({
-  bottomSheetContent: {
+  bottomSheet: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: "#ffffff",
+  },
+  bottomSheetInputs: {
+    flex: 1,
+    gap: 12,
   },
   inputContainer: {
 
   },
   titleInput: {
-    height: 44,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.lightBorder,
-    borderRadius: 8,
     paddingHorizontal: 16,
     fontSize: 20,
-    color: Colors.dark,
-    backgroundColor: Colors.background,
   },
   descriptionInput: {
-    height: 44,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.lightBorder,
-    borderRadius: 8,
     paddingHorizontal: 16,
-    fontSize: 20,
-    color: Colors.dark,
-    backgroundColor: Colors.background,
+    fontSize: 18,
   },
   inputError: {
     borderColor: 'red', // Highlight input with error
@@ -237,5 +254,27 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     paddingHorizontal: 16,
   },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    height: 40,
+  },
+  outlinedButton: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.lightBorder,
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 4,
+  },
+  outlinedButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.dark,
+  }
 });
 
