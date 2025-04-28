@@ -12,7 +12,8 @@ import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 
 import { useSQLiteContext } from "expo-sqlite";
 import { Colors } from "@/constants/Colors";
-import { getIcon,
+import {
+  getIcon,
   calendarIosIconParams,
   calendarGeneralIconParams,
   upcomingIosIconParams,
@@ -31,7 +32,7 @@ interface TodoFormData {
 }
 
 interface TodoFormProps {
-  todo?: Todo & {project_id: string, project_name: string, project_color: string};
+  todo?: Todo & { project_id: string, project_name: string, project_color: string };
 }
 
 const platform = Platform.OS;
@@ -57,7 +58,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
     }
   )
 
-  const { control, handleSubmit, reset, trigger } = useForm<TodoFormData>({
+  const { control, handleSubmit, reset, trigger, formState: { errors } } = useForm<TodoFormData>({
     defaultValues: {
       name: todo?.name || '',
       description: todo?.description || ''
@@ -90,7 +91,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
         hapticFeedbackEnabled={true}
         ignoresTopSafeArea={true}
         labeled
-        
+
       >
         <Tabs.Screen
           name="today"
@@ -138,11 +139,11 @@ const TabLayout = ({ todo }: TodoFormProps) => {
           <BottomSheetBackdrop
             {...props}
             disappearsOnIndex={-1}        // hide backdrop when sheet is closed
-            appearsOnIndex={ 0 }          // show backdrop starting at index 0
+            appearsOnIndex={0}          // show backdrop starting at index 0
             pressBehavior="close"
           />
         )}
-        // enableHandlePanningGesture={false} // disable dragging to close
+      // enableHandlePanningGesture={false} // disable dragging to close
       >
         <View style={styles.closeButtonContainer}>
           <TouchableOpacity
@@ -165,18 +166,18 @@ const TabLayout = ({ todo }: TodoFormProps) => {
               required: 'Task name is required', // Add validation rule
             }}
             render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-                <BottomSheetTextInput
-                  ref={taskNameInputRef}
-                  placeholder="Name"
-                  style={styles.titleInput}
-                  placeholderTextColor={Colors.lightText}
-                  cursorColor={Colors.primary}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  onSubmitEditing={() => handleSubmit(onSubmit)} 
-                  autoCorrect={false}
-                />
+              <BottomSheetTextInput
+                ref={taskNameInputRef}
+                placeholder="Name"
+                style={styles.titleInput}
+                placeholderTextColor={Colors.lightText}
+                cursorColor={Colors.primary}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                onSubmitEditing={() => handleSubmit(onSubmit)}
+                autoCorrect={false}
+              />
             )}
             name="name"
           />
@@ -201,14 +202,33 @@ const TabLayout = ({ todo }: TodoFormProps) => {
             name="description"
           />
           <BottomSheetScrollView
+            keyboardShouldPersistTaps="always" // very useful!
             horizontal
-            style={styles.actionButtonsContainer}>
+            showsHorizontalScrollIndicator={false}
+            style={styles.actionButtonsContainer}
+            contentContainerStyle={{ alignItems: 'center' }}
+          >
             <Chip icon="flag-outline" label="Priority" />
-            <Chip icon="calendar-outline" label="Due Date" />
+            <Chip icon="calendar-outline" label="Date" />
+            <Chip icon="location-outline" label="Location" />
+            <Chip icon="pricetags-outline" label="Label" />
             <Chip icon="time-outline" label="Time" />
           </BottomSheetScrollView>
         </BottomSheetView>
 
+        <BottomSheetView style={styles.bottomSheetFooter}>
+          <Pressable style={({ pressed }) => [
+              styles.outlinedButton,
+              {
+                  backgroundColor: pressed ? Colors.lightBorder : 'transparent'
+              }
+          ]}>
+              <Text style={styles.outlinedButtonText}><Text style={{color: Colors.primary}}># </Text>Project</Text>
+          </Pressable>
+          <Pressable style={{...styles.submitButton, opacity: errors.name ? 0.5 : 1}} onPress={handleSubmit(onSubmit)}>
+            <Ionicons name="arrow-up-outline" size={24} color={"#ffffff"} />
+          </Pressable>
+        </BottomSheetView>
       </BottomSheet>
     </GestureHandlerRootView>
   );
@@ -228,11 +248,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   bottomSheetInputs: {
-    flex: 1,
+    flex: 0,
     gap: 12,
-  },
-  inputContainer: {
-
   },
   titleInput: {
     paddingHorizontal: 16,
@@ -257,7 +274,24 @@ const styles = StyleSheet.create({
   actionButtonsContainer: {
     flexDirection: 'row',
     paddingHorizontal: 16,
+    height: 50,
+    maxHeight: 50,
+  },
+  bottomSheetFooter: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.lightBorder,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  submitButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 100,
     height: 40,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   outlinedButton: {
     borderWidth: StyleSheet.hairlineWidth,
@@ -269,7 +303,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 4,
+    maxHeight: 40,
+    minWidth: 80,
+    // maxWidth: 200,
+    gap: 8,
   },
   outlinedButtonText: {
     fontSize: 14,

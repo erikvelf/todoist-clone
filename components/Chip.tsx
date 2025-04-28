@@ -1,15 +1,16 @@
 import { Colors } from "@/constants/Colors"
 import { Ionicons } from "@expo/vector-icons"
-import { Pressable, StyleSheet, Text } from "react-native"
+import { Pressable, PressableProps, StyleSheet, Text } from "react-native"
 
-export const Chip = ({ icon, label }: { icon: keyof typeof Ionicons.glyphMap, label: string }) => {
-        return (
+export const Chip = (props: { icon: keyof typeof Ionicons.glyphMap, label: string, } & PressableProps ) => {
+    const { icon, label, ...rest } = props;
+    return (
         <Pressable style={({ pressed }) => [
             styles.outlinedButton,
             {
                 backgroundColor: pressed ? Colors.lightBorder : 'transparent'
             }
-        ]}>
+        ]} {...rest}>
             <Ionicons name={icon} size={24} color={Colors.dark} />
             <Text style={styles.outlinedButtonText}>{label}</Text>
         </Pressable>
