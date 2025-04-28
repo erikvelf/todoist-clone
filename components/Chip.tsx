@@ -27,6 +27,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'row',
+        maxHeight: 40,
+        minWidth: 80,
+        // maxWidth: 200,
+        gap: 8,
     },
     outlinedButtonText: {
         fontSize: 14,
