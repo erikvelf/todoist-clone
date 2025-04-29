@@ -37,7 +37,7 @@ interface TodoFormProps {
 }
 
 const platform = Platform.OS;
-const snapPoints = ['30%'];
+const snapPoints = ['25%'];
 
 const TabLayout = ({ todo }: TodoFormProps) => {
   const { bottomSheetRef } = useBottomSheet();
@@ -149,6 +149,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
       </Tabs>
 
       <BottomSheet
+        handleComponent={null}
         enableContentPanningGesture={true}
         style={styles.bottomSheet}
         ref={bottomSheetRef}
@@ -158,7 +159,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
         handleIndicatorStyle={{ backgroundColor: Colors.lightBorder }}
         backgroundStyle={{ backgroundColor: Colors.background }}
         onChange={handleSheetChanges}
-        enableDynamicSizing={false} // because we set the height manually
+       // enableDynamicSizing={false} // because we set the height manually
         backdropComponent={props => (
           <BottomSheetBackdrop
             {...props}
@@ -170,20 +171,6 @@ const TabLayout = ({ todo }: TodoFormProps) => {
       // enableHandlePanningGesture={false} // disable dragging to close
       >
       <BottomSheetScrollView keyboardShouldPersistTaps="always" style={styles.bottomSheetScrollViewContainer}>
-        <BottomSheetView style={styles.closeButtonContainer}>
-          <TouchableOpacity
-            onPress={() => {
-              Keyboard.dismiss();
-              bottomSheetRef.current?.close();
-            }}
-          >
-            <Icon
-              name="close-circle-outline"
-              size={32}
-              color={Colors.dark}
-            />
-          </TouchableOpacity>
-        </BottomSheetView>
         <BottomSheetView style={styles.bottomSheetInputs}>
           <Controller
             control={control}
@@ -310,6 +297,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    marginBottom: 16,
   },
   submitButton: {
     backgroundColor: Colors.primary,
@@ -341,6 +329,8 @@ const styles = StyleSheet.create({
   },
   bottomSheetScrollViewContainer: {
     flex: 1,
+    paddingVertical: 16,
+    marginBottom: 16,
   }
 });
 
