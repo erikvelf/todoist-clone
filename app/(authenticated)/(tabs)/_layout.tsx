@@ -2,12 +2,12 @@ import { Tabs } from "@/components/Tabs";
 import { Platform, Keyboard, StyleSheet, View, TouchableOpacity, Pressable, Text } from "react-native";
 import Icon from "@react-native-vector-icons/ionicons";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import BottomSheet, { BottomSheetView, BottomSheetTextInput, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetView, BottomSheetTextInput, BottomSheetBackdrop, BottomSheetScrollView, useBottomSheetSpringConfigs } from '@gorhom/bottom-sheet';
 import { BottomSheetProvider, useBottomSheet } from '@/context/BottomSheetContext';
-import { useRef, useCallback, ElementRef, useState } from "react";
+import { useRef, useCallback, ElementRef, useState, useEffect } from "react";
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { Project, Todo } from "@/types/interfaces";
-import { projects } from "@/db/schema";
+import { projects, todos } from "@/db/schema";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 
 import { useSQLiteContext } from "expo-sqlite";
@@ -25,6 +25,7 @@ import {
 } from "@/utils/icons";
 import { Ionicons } from "@expo/vector-icons";
 import { Chip } from "@/components/Chip";
+import { eq } from "drizzle-orm";
 
 interface TodoFormData {
   name: string;
@@ -62,7 +63,8 @@ const TabLayout = ({ todo }: TodoFormProps) => {
     defaultValues: {
       name: todo?.name || '',
       description: todo?.description || ''
-    }
+    },
+    mode: 'onChange' // trigger rerender for the 'create task' button so its opacity is updated
   });
 
   const handleSheetChanges = useCallback((index: number) => {
@@ -75,13 +77,35 @@ const TabLayout = ({ todo }: TodoFormProps) => {
     }
   }, [reset]);
 
-  const onSubmit: SubmitHandler<TodoFormData> = (data) => {
-    // --- TODO: Add logic to save the task --- 
-    // e.g., call an API, update database
-
+  const onSubmit: SubmitHandler<TodoFormData> = async (data) => {
+    if (todo) {
+      // update the task
+      await drizzleDb.update(todos).set({
+        name: data.name,
+        description: data.description,
+        project_id: selectedProject.id,
+        due_date: 0, // TODO: Add due date
+      }).where(eq(todos.id, todo.id))
+      
+    } else {
+      // create a new task
+      await drizzleDb.insert(todos).values({
+        name: data.name,
+        description: data.description,
+        project_id: selectedProject.id,
+        priority: 0,
+        date_added: Date.now(),
+        completed: 0,
+        due_date: 0, // TODO: Add due date
+      })
+    }
     Keyboard.dismiss();
     bottomSheetRef.current?.close();
   };
+
+  useEffect(() => {
+    trigger()
+  }, [trigger])
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -90,8 +114,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
         tabBarInactiveTintColor={Colors.dark}
         hapticFeedbackEnabled={true}
         ignoresTopSafeArea={true}
-        labeled
-
+        labeled={true}
       >
         <Tabs.Screen
           name="today"
@@ -126,6 +149,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
       </Tabs>
 
       <BottomSheet
+        enableContentPanningGesture={true}
         style={styles.bottomSheet}
         ref={bottomSheetRef}
         index={-1}
@@ -145,7 +169,8 @@ const TabLayout = ({ todo }: TodoFormProps) => {
         )}
       // enableHandlePanningGesture={false} // disable dragging to close
       >
-        <View style={styles.closeButtonContainer}>
+      <BottomSheetScrollView keyboardShouldPersistTaps="always" style={styles.bottomSheetScrollViewContainer}>
+        <BottomSheetView style={styles.closeButtonContainer}>
           <TouchableOpacity
             onPress={() => {
               Keyboard.dismiss();
@@ -158,7 +183,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
               color={Colors.dark}
             />
           </TouchableOpacity>
-        </View>
+        </BottomSheetView>
         <BottomSheetView style={styles.bottomSheetInputs}>
           <Controller
             control={control}
@@ -218,17 +243,18 @@ const TabLayout = ({ todo }: TodoFormProps) => {
 
         <BottomSheetView style={styles.bottomSheetFooter}>
           <Pressable style={({ pressed }) => [
-              styles.outlinedButton,
-              {
-                  backgroundColor: pressed ? Colors.lightBorder : 'transparent'
-              }
+            styles.outlinedButton,
+            {
+              backgroundColor: pressed ? Colors.lightBorder : 'transparent'
+            }
           ]}>
-              <Text style={styles.outlinedButtonText}><Text style={{color: Colors.primary}}># </Text>Project</Text>
+            <Text style={styles.outlinedButtonText}><Text style={{ color: Colors.primary }}># </Text>Project</Text>
           </Pressable>
-          <Pressable style={{...styles.submitButton, opacity: errors.name ? 0.5 : 1}} onPress={handleSubmit(onSubmit)}>
+          <Pressable style={{ ...styles.submitButton, opacity: errors.name ? 0.5 : 1 }} onPress={handleSubmit(onSubmit)}>
             <Ionicons name="arrow-up-outline" size={24} color={"#ffffff"} />
           </Pressable>
         </BottomSheetView>
+      </BottomSheetScrollView>
       </BottomSheet>
     </GestureHandlerRootView>
   );
@@ -312,6 +338,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: Colors.dark,
+  },
+  bottomSheetScrollViewContainer: {
+    flex: 1,
   }
 });
 
