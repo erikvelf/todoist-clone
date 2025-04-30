@@ -1,12 +1,18 @@
 import { Colors } from "@/constants/Colors";
-import { Stack } from "expo-router";
-import { useWindowDimensions } from "react-native";
+import { Stack, useRouter } from "expo-router";
+import { Pressable, useWindowDimensions, Text, StyleSheet, Platform, Button } from "react-native";
 
 const Layout = () => {
+  const router = useRouter();
   const screenHeight = useWindowDimensions().height;
 
   return (
-    <Stack screenOptions={{ contentStyle: { backgroundColor: "fff" } }}>
+    <Stack screenOptions={{
+      contentStyle: { backgroundColor: "fff" },
+      headerTintColor: Colors.primary,
+      headerTitleStyle: { color: "#000" },
+      // headerTitleAlign: "center",
+    }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="task/new" options={{
         presentation: "formSheet",
@@ -32,8 +38,30 @@ const Layout = () => {
         sheetExpandsWhenScrolledToEdge: false,
         sheetCornerRadius: 10,
       }} />
+      <Stack.Screen name="task/date-select" options={{
+        presentation: "modal",
+        title: "Schedule",
+        headerTitleAlign: "center",
+        headerLeft: () => (Platform.OS === "ios" ? <Button title="Cancel" color={Colors.primary} onPress={() => router.dismiss()} /> : null),
+        headerRight: () => (
+          <Pressable onPress={() => router.back()}>
+            <Text style={styles.doneButton}>Done</Text>
+          </Pressable>
+        ),
+        contentStyle: {
+          backgroundColor: Colors.background,
+        },
+      }} />
     </Stack>
   );
 };
 
 export default Layout;
+
+const styles = StyleSheet.create({
+  doneButton: {
+    color: Colors.primary,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});

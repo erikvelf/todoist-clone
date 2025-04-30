@@ -26,6 +26,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Chip } from "@/components/Chip";
 import { eq } from "drizzle-orm";
+import { useRouter } from "expo-router";
+import { useMMKVString } from "react-native-mmkv";
 
 interface TodoFormData {
   name: string;
@@ -40,6 +42,7 @@ const platform = Platform.OS;
 const snapPoints = ['25%'];
 
 const TabLayout = ({ todo }: TodoFormProps) => {
+  const router = useRouter();
   const { bottomSheetRef } = useBottomSheet();
   const taskNameInputRef = useRef<ElementRef<typeof BottomSheetTextInput>>(null);
 
@@ -59,6 +62,19 @@ const TabLayout = ({ todo }: TodoFormProps) => {
     }
   )
 
+  const [selectedDate, setSelectedDate] = useState<Date>(
+    todo?.due_date ? new Date(todo.due_date) : new Date()
+  );
+  
+  const [previouslySelectedDate, setPreviouslySelectedDate] = useMMKVString('selectedDate');
+
+  useEffect(() => {
+    if (previouslySelectedDate) {
+      setSelectedDate(new Date(previouslySelectedDate));
+      setPreviouslySelectedDate(undefined)
+    }
+  }, [previouslySelectedDate]);
+
   const { control, handleSubmit, reset, trigger, formState: { errors } } = useForm<TodoFormData>({
     defaultValues: {
       name: todo?.name || '',
@@ -77,6 +93,14 @@ const TabLayout = ({ todo }: TodoFormProps) => {
     }
   }, [reset]);
 
+  const changeDate = () => {
+    const dateString = selectedDate.toISOString();
+    setPreviouslySelectedDate(dateString);
+    router.push('/task/date-select')
+    
+    Keyboard.dismiss();
+  }
+
   const onSubmit: SubmitHandler<TodoFormData> = async (data) => {
     if (todo) {
       // update the task
@@ -84,7 +108,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
         name: data.name,
         description: data.description,
         project_id: selectedProject.id,
-        due_date: 0, // TODO: Add due date
+        due_date: selectedDate.getTime(),
       }).where(eq(todos.id, todo.id))
       
     } else {
@@ -96,7 +120,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
         priority: 0,
         date_added: Date.now(),
         completed: 0,
-        due_date: 0, // TODO: Add due date
+        due_date: selectedDate.getTime(),
       })
     }
     Keyboard.dismiss();
@@ -220,8 +244,8 @@ const TabLayout = ({ todo }: TodoFormProps) => {
             style={styles.actionButtonsContainer}
             contentContainerStyle={{ alignItems: 'center' }}
           >
+            <Chip icon="calendar-outline" label="Date" onPress={changeDate} />
             <Chip icon="flag-outline" label="Priority" />
-            <Chip icon="calendar-outline" label="Date" />
             <Chip icon="location-outline" label="Location" />
             <Chip icon="pricetags-outline" label="Label" />
             <Chip icon="time-outline" label="Time" />
