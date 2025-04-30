@@ -189,7 +189,10 @@ const TabLayout = ({ todo }: TodoFormProps) => {
             {...props}
             disappearsOnIndex={-1}        // hide backdrop when sheet is closed
             appearsOnIndex={0}          // show backdrop starting at index 0
-            pressBehavior="close"
+            onPress={() => {
+              Keyboard.dismiss();
+              bottomSheetRef.current?.close();
+            }}
           />
         )}
       // enableHandlePanningGesture={false} // disable dragging to close
