@@ -97,6 +97,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
     const dateString = selectedDate.toISOString();
     setPreviouslySelectedDate(dateString);
     router.push('/task/date-select')
+    bottomSheetRef.current?.snapToIndex(1) // to leave the sheet open and down in the screen when changing route
     
     Keyboard.dismiss();
   }
