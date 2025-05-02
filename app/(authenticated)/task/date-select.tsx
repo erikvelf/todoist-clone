@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router';
 import { useMMKVString } from 'react-native-mmkv';
 import { Colors, DATE_COLORS } from '@/constants/Colors';
-import { Ionicons } from '@expo/vector-icons';
 import { addDays, addWeeks, format, nextSaturday } from 'date-fns';
 import DateSelectButton from '@/components/DateSelectButton';
 

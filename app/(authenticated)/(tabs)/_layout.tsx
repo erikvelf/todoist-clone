@@ -11,7 +11,7 @@ import { projects, todos } from "@/db/schema";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 
 import { useSQLiteContext } from "expo-sqlite";
-import { Colors } from "@/constants/Colors";
+import { Colors, DATE_COLORS } from "@/constants/Colors";
 import {
   getIcon,
   calendarIosIconParams,
@@ -28,6 +28,7 @@ import { Chip } from "@/components/Chip";
 import { eq } from "drizzle-orm";
 import { useRouter } from "expo-router";
 import { useMMKVString } from "react-native-mmkv";
+import { isTomorrow, isToday, isSameDay, format } from "date-fns";
 
 interface TodoFormData {
   name: string;
@@ -65,7 +66,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
   const [selectedDate, setSelectedDate] = useState<Date>(
     todo?.due_date ? new Date(todo.due_date) : new Date()
   );
-  
+
   const [previouslySelectedDate, setPreviouslySelectedDate] = useMMKVString('selectedDate');
 
   useEffect(() => {
@@ -98,7 +99,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
     setPreviouslySelectedDate(dateString);
     router.push('/task/date-select')
     bottomSheetRef.current?.snapToIndex(1) // to leave the sheet open and down in the screen when changing route
-    
+
     Keyboard.dismiss();
   }
 
@@ -111,7 +112,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
         project_id: selectedProject.id,
         due_date: selectedDate.getTime(),
       }).where(eq(todos.id, todo.id))
-      
+
     } else {
       // create a new task
       await drizzleDb.insert(todos).values({
@@ -131,6 +132,25 @@ const TabLayout = ({ todo }: TodoFormProps) => {
   useEffect(() => {
     trigger()
   }, [trigger])
+
+  const getDateObject = (date: Date) => {
+    if (isSameDay(date, new Date())) {
+      return {
+        name: 'Today',
+        color: DATE_COLORS.today
+      }
+    }
+    if (isTomorrow(new Date(date))) {
+      return {
+        name: 'Tomorrow',
+        color: DATE_COLORS.tomorrow
+      }
+    }
+    return {
+      name: format(date, 'EEEE, d MMM'),
+      color: DATE_COLORS.other
+    }
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -184,7 +204,7 @@ const TabLayout = ({ todo }: TodoFormProps) => {
         handleIndicatorStyle={{ backgroundColor: Colors.lightBorder }}
         backgroundStyle={{ backgroundColor: Colors.background }}
         onChange={handleSheetChanges}
-       // enableDynamicSizing={false} // because we set the height manually
+        // enableDynamicSizing={false} // because we set the height manually
         backdropComponent={props => (
           <BottomSheetBackdrop
             {...props}
@@ -198,78 +218,85 @@ const TabLayout = ({ todo }: TodoFormProps) => {
         )}
       // enableHandlePanningGesture={false} // disable dragging to close
       >
-      <BottomSheetScrollView keyboardShouldPersistTaps="always" style={styles.bottomSheetScrollViewContainer}>
-        <BottomSheetView style={styles.bottomSheetInputs}>
-          <Controller
-            control={control}
-            rules={{
-              required: 'Task name is required', // Add validation rule
-            }}
-            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-              <BottomSheetTextInput
-                ref={taskNameInputRef}
-                placeholder="Name"
-                style={styles.titleInput}
-                placeholderTextColor={Colors.lightText}
-                cursorColor={Colors.primary}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                onSubmitEditing={() => handleSubmit(onSubmit)}
-                autoCorrect={false}
-              />
-            )}
-            name="name"
-          />
+        <BottomSheetScrollView keyboardShouldPersistTaps="always" style={styles.bottomSheetScrollViewContainer}>
+          <BottomSheetView style={styles.bottomSheetInputs}>
+            <Controller
+              control={control}
+              rules={{
+                required: 'Task name is required', // Add validation rule
+              }}
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <BottomSheetTextInput
+                  ref={taskNameInputRef}
+                  placeholder="Name"
+                  style={styles.titleInput}
+                  placeholderTextColor={Colors.lightText}
+                  cursorColor={Colors.primary}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  onSubmitEditing={() => handleSubmit(onSubmit)}
+                  autoCorrect={false}
+                />
+              )}
+              name="name"
+            />
 
-          <Controller
-            control={control}
-            rules={{
-              // Add any validation rules for description if needed
-            }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <BottomSheetTextInput
-                placeholder="Description"
-                style={styles.descriptionInput}
-                placeholderTextColor={Colors.lightText}
-                cursorColor={Colors.primary}
-                multiline={true}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
+            <Controller
+              control={control}
+              rules={{
+                // Add any validation rules for description if needed
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <BottomSheetTextInput
+                  placeholder="Description"
+                  style={styles.descriptionInput}
+                  placeholderTextColor={Colors.lightText}
+                  cursorColor={Colors.primary}
+                  multiline={true}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  autoCorrect={false}
+                  value={value}
+                />
+              )}
+              name="description"
+            />
+            <BottomSheetScrollView
+              keyboardShouldPersistTaps="always" // very useful!
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.actionButtonsContainer}
+              contentContainerStyle={{ alignItems: 'center' }}
+            >
+              <Chip icon="calendar-outline"
+                iconColor={getDateObject(selectedDate).color}
+                label={getDateObject(selectedDate).name}
+                onPress={changeDate}
+                borderColor={getDateObject(selectedDate).color}
+                labelColor={getDateObject(selectedDate).color}
               />
-            )}
-            name="description"
-          />
-          <BottomSheetScrollView
-            keyboardShouldPersistTaps="always" // very useful!
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.actionButtonsContainer}
-            contentContainerStyle={{ alignItems: 'center' }}
-          >
-            <Chip icon="calendar-outline" label="Date" onPress={changeDate} />
-            <Chip icon="flag-outline" label="Priority" />
-            <Chip icon="location-outline" label="Location" />
-            <Chip icon="pricetags-outline" label="Label" />
-            <Chip icon="time-outline" label="Time" />
-          </BottomSheetScrollView>
-        </BottomSheetView>
+              <Chip icon="flag-outline" label="Priority" />
+              <Chip icon="location-outline" label="Location" />
+              <Chip icon="pricetags-outline" label="Label" />
+              <Chip icon="time-outline" label="Time" />
+            </BottomSheetScrollView>
+          </BottomSheetView>
 
-        <BottomSheetView style={styles.bottomSheetFooter}>
-          <Pressable style={({ pressed }) => [
-            styles.outlinedButton,
-            {
-              backgroundColor: pressed ? Colors.lightBorder : 'transparent'
-            }
-          ]}>
-            <Text style={styles.outlinedButtonText}><Text style={{ color: Colors.primary }}># </Text>Project</Text>
-          </Pressable>
-          <Pressable style={{ ...styles.submitButton, opacity: errors.name ? 0.5 : 1 }} onPress={handleSubmit(onSubmit)}>
-            <Ionicons name="arrow-up-outline" size={24} color={"#ffffff"} />
-          </Pressable>
-        </BottomSheetView>
-      </BottomSheetScrollView>
+          <BottomSheetView style={styles.bottomSheetFooter}>
+            <Pressable style={({ pressed }) => [
+              styles.outlinedButton,
+              {
+                backgroundColor: pressed ? Colors.lightBorder : 'transparent'
+              }
+            ]}>
+              <Text style={styles.outlinedButtonText}><Text style={{ color: Colors.primary }}># </Text>Project</Text>
+            </Pressable>
+            <Pressable style={{ ...styles.submitButton, opacity: errors.name ? 0.5 : 1 }} onPress={handleSubmit(onSubmit)}>
+              <Ionicons name="arrow-up-outline" size={24} color={"#ffffff"} />
+            </Pressable>
+          </BottomSheetView>
+        </BottomSheetScrollView>
       </BottomSheet>
     </GestureHandlerRootView>
   );
