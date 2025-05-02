@@ -1,10 +1,14 @@
-import { View, Text, StyleSheet, Button, Pressable, Touchable, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, Button, Pressable, Touchable, TouchableOpacity, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router';
 import { useMMKVString } from 'react-native-mmkv';
 import { Colors, DATE_COLORS } from '@/constants/Colors';
 import { addDays, addWeeks, format, nextSaturday } from 'date-fns';
 import DateSelectButton from '@/components/DateSelectButton';
+// import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import IosDateSelection from '@/components/IosDateSelection';
+import AndroidDateSelection from '@/components/AndroidDateSelection';
+import { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
 function next(period: "weekend" | "day" | "week"): Date;
 function next(period: "day" | "week", amount: number): Date;
@@ -21,6 +25,7 @@ function next(period: string, amount: number = 0): Date {
   return addWeeks(new Date(), amount);
 }
 
+
 const Page = () => {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -36,6 +41,11 @@ const Page = () => {
     const dateString = date.toISOString();
     setSelectedDate(dateString);
     router.dismiss();
+  }
+
+  const updateDate = (event: DateTimePickerEvent, date?: Date) => {
+    const currentDate = date || new Date();
+    onSave(currentDate);
   }
 
   return (
@@ -70,6 +80,35 @@ const Page = () => {
           onPress={() => onSave(next("week", 1))}
         />
       </View>
+      {Platform.OS === 'ios' ? 
+        <IosDateSelection
+          mode="date"
+          display="inline"
+          accentColor={Colors.primary}
+          value={new Date(currentDate)}
+          onChange={updateDate}
+        /> : 
+        <View>
+          <Pressable
+            onPress={() => {
+              DateTimePickerAndroid.open({
+                mode: 'date',
+                display: 'calendar',
+                value: new Date(currentDate),
+                onChange: updateDate
+              })
+              // <AndroidDateSelection
+              //   mode="date"
+              //   display="calendar"
+              //   value={new Date(currentDate)}
+              //   onChange={updateDate}
+              // />
+            }}
+          >
+            <Text>Select date</Text>
+          </Pressable>
+        </View>
+      }
     </View>
   )
 }
