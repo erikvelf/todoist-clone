@@ -1,8 +1,7 @@
 import { Tabs } from "@/components/Tabs";
-import { Platform, Keyboard, StyleSheet, View, TouchableOpacity, Pressable, Text } from "react-native";
-import Icon from "@react-native-vector-icons/ionicons";
+import { Platform, Keyboard, StyleSheet, Pressable, Text } from "react-native";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import BottomSheet, { BottomSheetView, BottomSheetTextInput, BottomSheetBackdrop, BottomSheetScrollView, useBottomSheetSpringConfigs } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetView, BottomSheetTextInput, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { BottomSheetProvider, useBottomSheet } from '@/context/BottomSheetContext';
 import { useRef, useCallback, ElementRef, useState, useEffect } from "react";
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
@@ -11,7 +10,7 @@ import { projects, todos } from "@/db/schema";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 
 import { useSQLiteContext } from "expo-sqlite";
-import { Colors, DATE_COLORS } from "@/constants/Colors";
+import { Colors } from "@/constants/Colors";
 import {
   getIcon,
   calendarIosIconParams,
@@ -28,7 +27,7 @@ import { Chip } from "@/components/Chip";
 import { eq } from "drizzle-orm";
 import { useRouter } from "expo-router";
 import { useMMKVString } from "react-native-mmkv";
-import { isTomorrow, isToday, isSameDay, format } from "date-fns";
+import getDateObject from "@/utils/getDateObject";
 
 interface TodoFormData {
   name: string;
@@ -132,25 +131,6 @@ const TabLayout = ({ todo }: TodoFormProps) => {
   useEffect(() => {
     trigger()
   }, [trigger])
-
-  const getDateObject = (date: Date) => {
-    if (isSameDay(date, new Date())) {
-      return {
-        name: 'Today',
-        color: DATE_COLORS.today
-      }
-    }
-    if (isTomorrow(new Date(date))) {
-      return {
-        name: 'Tomorrow',
-        color: DATE_COLORS.tomorrow
-      }
-    }
-    return {
-      name: format(date, 'EEEE, d MMM'),
-      color: DATE_COLORS.other
-    }
-  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

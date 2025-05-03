@@ -7,8 +7,8 @@ import { addDays, addWeeks, format, nextSaturday } from 'date-fns';
 import DateSelectButton from '@/components/DateSelectButton';
 // import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import IosDateSelection from '@/components/IosDateSelection';
-import AndroidDateSelection from '@/components/AndroidDateSelection';
 import { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import getDateObject from '@/utils/getDateObject';
 
 function next(period: "weekend" | "day" | "week"): Date;
 function next(period: "day" | "week", amount: number): Date;
@@ -16,12 +16,12 @@ function next(period: "day" | "week", amount: number): Date;
 function next(period: string, amount: number = 0): Date {
   if (period === "day") {
     return addDays(new Date(), amount);
-  } 
+  }
 
   if (period === "weekend") {
     return nextSaturday(new Date());
   }
-  
+
   return addWeeks(new Date(), amount);
 }
 
@@ -51,23 +51,23 @@ const Page = () => {
   return (
     <View style={styles.container}>
       <View style={styles.quickButtons}>
-        <DateSelectButton 
-          icon="today-outline" 
-          label="Today" 
+        <DateSelectButton
+          icon="today-outline"
+          label="Today"
           date={format(next("day"), "EEE")}
           color={DATE_COLORS.today}
           onPress={() => onSave(next("day"))}
         />
-        <DateSelectButton 
-          icon="calendar-outline" 
-          label="Tomorrow" 
+        <DateSelectButton
+          icon="calendar-outline"
+          label="Tomorrow"
           date={format(next("day", 1), "EEE")}
           color={DATE_COLORS.tomorrow}
           onPress={() => onSave(next("day", 1))}
         />
-        <DateSelectButton 
-          icon="calendar-outline" 
-          label="This weekend" 
+        <DateSelectButton
+          icon="calendar-outline"
+          label="This weekend"
           date={format(next("weekend"), "EEE")}
           color={DATE_COLORS.weekend}
           onPress={() => onSave(next("weekend"))}
@@ -80,35 +80,34 @@ const Page = () => {
           onPress={() => onSave(next("week", 1))}
         />
       </View>
-      {Platform.OS === 'ios' ? 
-        <IosDateSelection
-          mode="date"
-          display="inline"
-          accentColor={Colors.primary}
-          value={new Date(currentDate)}
-          onChange={updateDate}
-        /> : 
-        <View>
+
+      <View style={styles.dateSelectContainer}>
+        {Platform.OS === 'ios' ?
+          <IosDateSelection
+            mode="date"
+            display="inline"
+            accentColor={Colors.primary}
+            value={new Date(currentDate)}
+            onChange={updateDate}
+            style={{justifyContent: 'center', alignItems: 'center'}}
+          />
+          :
           <Pressable
+            style={styles.dateSelectButton}
             onPress={() => {
               DateTimePickerAndroid.open({
                 mode: 'date',
                 display: 'calendar',
                 value: new Date(currentDate),
-                onChange: updateDate
+                onChange: updateDate,
+                minimumDate: new Date(),
               })
-              // <AndroidDateSelection
-              //   mode="date"
-              //   display="calendar"
-              //   value={new Date(currentDate)}
-              //   onChange={updateDate}
-              // />
             }}
           >
-            <Text>Select date</Text>
+            <Text style={styles.dateSelectButtonText}>Change date from "{getDateObject(new Date(currentDate)).name}"</Text>
           </Pressable>
-        </View>
-      }
+        }
+      </View>
     </View>
   )
 }
@@ -143,5 +142,22 @@ const styles = StyleSheet.create({
   quickButtonDate: {
     fontSize: 16,
     color: Colors.dark,
+  },
+  dateSelectButton: {
+    alignItems: "center",
+    width: '100%',
+    padding: 14,
+    backgroundColor: Colors.primary,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  dateSelectButtonText: {
+    color: Colors.background,
+    fontWeight: "bold",
+  },
+  dateSelectContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    paddingHorizontal: 20,
   }
 })
