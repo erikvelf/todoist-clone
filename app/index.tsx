@@ -1,6 +1,6 @@
 import * as WebBrowser from "expo-web-browser";
 import { StyleSheet, Image } from "react-native";
-import { StartSSOFlowParams, useOAuth } from "@clerk/clerk-expo";
+import { useSSO } from "@clerk/clerk-expo";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,15 +8,15 @@ import { TouchableOpacity } from "react-native";
 import { Colors } from "@/constants/Colors";
 
 export default function Index() {
-  const { startOAuthFlow } = useOAuth({ strategy: "oauth_apple" });
-  const { startOAuthFlow: googleAuth } = useOAuth({ strategy: "oauth_google" });
   const { top } = useSafeAreaInsets();
-  // const { startSSOFlow } = useSSO();
+  const { startSSOFlow } = useSSO();
 
   const handleAppleOAuth = async () => {
     try {
       // Important for updating our current session
-      const { createdSessionId, setActive } = await startOAuthFlow();
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: "oauth_apple",
+      });
       console.log("handleAppleOAuth ~ createSessionId", createdSessionId);
 
       // locally set the user as active using the current sessionId
@@ -32,7 +32,9 @@ export default function Index() {
   const handleGoogleOAuth = async () => {
     try {
       // Important for updating our current session
-      const { createdSessionId, setActive } = await googleAuth();
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: "oauth_google",
+      });
       console.log("handleGoogleOAuth ~ createSessionId", createdSessionId);
 
       // locally set the user as active using the current sessionId
