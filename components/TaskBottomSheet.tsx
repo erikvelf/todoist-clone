@@ -1,6 +1,7 @@
-import React, { useRef, useCallback, ElementRef, useState, useEffect } from 'react';
-import { Platform, Keyboard, StyleSheet, View, Pressable, Text } from 'react-native';
-import { BottomSheetView, BottomSheetTextInput, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import React, { useRef, useCallback, ElementRef, useState, useEffect } from "react";
+import { Platform, Keyboard, StyleSheet, Pressable, Text, View } from "react-native";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import BottomSheet, { BottomSheetView, BottomSheetTextInput, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useBottomSheet } from '@/context/BottomSheetContext';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { Project, Todo } from "@/types/interfaces";
@@ -13,50 +14,48 @@ import { Chip } from "@/components/Chip";
 import { eq } from "drizzle-orm";
 import { useRouter } from "expo-router";
 import { useMMKVString } from "react-native-mmkv";
+import getDateObject from "@/utils/getDateObject";
 
 interface TodoFormData {
   name: string;
   description?: string;
 }
 
-interface TaskFormProps {
+// Renamed props interface for clarity within this component
+interface TaskBottomSheetProps {
   todo?: Todo & { project_id: string, project_name: string, project_color: string };
 }
 
-export const TaskBottomSheetContent: React.FC = () => {
-  const router = useRouter();
-  const { closeSheet, openSheet, sheetContent, sheetProps } = useBottomSheet();
-  const taskNameInputRef = useRef<ElementRef<typeof BottomSheetTextInput>>(null);
+const snapPoints = ['25%'];
 
-  const { todo } = (sheetProps as TaskFormProps) || {};
+export const TaskBottomSheet = ({ todo }: TaskBottomSheetProps) => {
+  const router = useRouter();
+  const { bottomSheetRef } = useBottomSheet();
+  const taskNameInputRef = useRef<ElementRef<typeof BottomSheetTextInput>>(null);
 
   const db = useSQLiteContext();
   const drizzleDb = drizzle(db);
 
-  const { data: projectList } = useLiveQuery(drizzleDb.select().from(projects));
+  // TODO: Fetch projects properly, maybe pass as prop or fetch here if needed for project selection
+  // const { data: projectData } = useLiveQuery(drizzleDb.select().from(projects));
 
-  const [selectedProject, setSelectedProject] = useState<Project>(() => 
+  const [selectedProject, setSelectedProject] = useState<Project>(
     todo?.project_id ? {
-      id: todo.project_id,
+      id: Number(todo.project_id), // Ensure ID is number if needed
       name: todo.project_name,
       color: todo.project_color
     } : {
-      id: 1, name: 'Inbox', color: '#000000'
+      id: 1, // inbox
+      name: 'Inbox',
+      color: '#000000' // Default color or fetch from DB/constants
     }
   );
-  const [selectedDate, setSelectedDate] = useState<Date>(() => 
+
+  const [selectedDate, setSelectedDate] = useState<Date>(
     todo?.due_date ? new Date(todo.due_date) : new Date()
   );
 
   const [previouslySelectedDate, setPreviouslySelectedDate] = useMMKVString('selectedDate');
-
-  const { control, handleSubmit, reset, trigger, formState: { errors } } = useForm<TodoFormData>({
-    defaultValues: {
-      name: todo?.name || '',
-      description: todo?.description || ''
-    },
-    mode: 'onChange'
-  });
 
   useEffect(() => {
     if (previouslySelectedDate) {
@@ -65,186 +64,243 @@ export const TaskBottomSheetContent: React.FC = () => {
     }
   }, [previouslySelectedDate, setPreviouslySelectedDate]);
 
+  const { control, handleSubmit, reset, trigger, formState: { errors, isValid } } = useForm<TodoFormData>({
+    defaultValues: {
+      name: todo?.name || '',
+      description: todo?.description || ''
+    },
+    mode: 'onChange'
+  });
+
+  const handleSheetChanges = useCallback((index: number) => {
+    if (index >= 0) {
+      taskNameInputRef.current?.focus();
+    } else {
+      // Reset form when sheet closes
+      reset({ name: '', description: '' }); // Reset explicitly
+      setSelectedDate(new Date()); // Reset date
+      // Reset project if necessary, e.g., back to Inbox
+      setSelectedProject({ id: 1, name: 'Inbox', color: '#000000' });
+      Keyboard.dismiss();
+    }
+  }, [reset, setSelectedDate, setSelectedProject]);
+
+  // Effect to trigger validation on mount/todo change
   useEffect(() => {
-    setSelectedProject(
-      todo?.project_id
-        ? { id: todo.project_id, name: todo.project_name, color: todo.project_color }
-        : { id: 1, name: 'Inbox', color: '#000000' }
-    );
-    setSelectedDate(todo?.due_date ? new Date(todo.due_date) : new Date());
-    reset({ name: todo?.name || '', description: todo?.description || '' });
-    if (sheetContent === 'TASK_FORM') {
-       setTimeout(() => taskNameInputRef.current?.focus(), 100);
-     }
+    if (todo) {
+      reset({ name: todo.name, description: todo.description || '' });
+      setSelectedDate(todo.due_date ? new Date(todo.due_date) : new Date());
+      setSelectedProject({
+        id: Number(todo.project_id),
+        name: todo.project_name,
+        color: todo.project_color
+      });
+    } else {
+      // Reset if no todo is passed (e.g., opening for new task)
+      reset({ name: '', description: '' });
+      setSelectedDate(new Date());
+      setSelectedProject({ id: 1, name: 'Inbox', color: '#000000' });
+    }
+    trigger(); // Trigger validation after reset/initial load
+  }, [todo, reset, trigger, setSelectedDate, setSelectedProject]);
 
-  }, [todo, sheetContent, reset]);
-
-  const handleDateSelect = useCallback((newDate: Date) => {
-    setSelectedDate(newDate);
-  }, []);
 
   const changeDate = () => {
-    openSheet('DATE_SELECTOR', { currentDate: selectedDate, onSelect: handleDateSelect });
-    console.log("Opening Date Selector Sheet");
+    const dateString = selectedDate.toISOString();
+    setPreviouslySelectedDate(dateString);
+    router.push('/task/date-select');
+    // Snappping down the bottom sheet before navigating
+    bottomSheetRef.current?.snapToIndex(1);
+    Keyboard.dismiss();
   };
 
   const onSubmit: SubmitHandler<TodoFormData> = async (data) => {
+    if (!isValid) return; // Prevent submission if form is invalid
+
     try {
       if (todo) {
+        // update the task
         await drizzleDb.update(todos).set({
-          name: data.name,
-          description: data.description,
+          name: data.name.trim(),
+          description: data.description?.trim(),
           project_id: selectedProject.id,
           due_date: selectedDate.getTime(),
         }).where(eq(todos.id, todo.id));
+        console.log('Task updated:', todo.id);
       } else {
-        await drizzleDb.insert(todos).values({
-          name: data.name,
-          description: data.description,
+        // create a new task
+        const result = await drizzleDb.insert(todos).values({
+          name: data.name.trim(),
+          description: data.description?.trim(),
           project_id: selectedProject.id,
           priority: 0,
           date_added: Date.now(),
-          completed: 0,
+          completed: 0, // false
           due_date: selectedDate.getTime(),
-        });
+        }).returning({ insertedId: todos.id });
+        console.log('Task created:', result[0]?.insertedId);
       }
-      closeSheet();
+      Keyboard.dismiss();
+      bottomSheetRef.current?.close();
     } catch (error) {
       console.error("Error saving task:", error);
+      // TODO: Show user feedback about the error
     }
   };
 
-  useEffect(() => {
-    if (sheetContent === 'TASK_FORM') {
-        trigger();
-    }
-  }, [sheetContent, trigger]);
-
-  if (sheetContent !== 'TASK_FORM') {
-    return null;
-  }
-
   return (
-    <>
-      <BottomSheetView style={styles.bottomSheetInputs}>
-        <Controller
-          control={control}
-          rules={{ required: 'Task name is required' }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <BottomSheetTextInput
-              ref={taskNameInputRef}
-              placeholder="Name"
-              style={[styles.titleInput, errors.name ? styles.inputError : null]}
-              placeholderTextColor={Colors.lightText}
-              cursorColor={Colors.primary}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              onSubmitEditing={() => handleSubmit(onSubmit)()}
-              autoCorrect={false}
-            />
-          )}
-          name="name"
+    <BottomSheet
+      handleComponent={null}
+      enableContentPanningGesture={true}
+      style={styles.bottomSheet}
+      ref={bottomSheetRef}
+      index={-1} // Start closed
+      snapPoints={snapPoints}
+      enablePanDownToClose={true}
+      handleIndicatorStyle={{ backgroundColor: Colors.lightBorder }}
+      backgroundStyle={{ backgroundColor: Colors.background }}
+      onChange={handleSheetChanges}
+      backdropComponent={props => (
+        <BottomSheetBackdrop
+          {...props}
+          disappearsOnIndex={-1}
+          appearsOnIndex={0}
+          onPress={() => {
+            Keyboard.dismiss();
+            bottomSheetRef.current?.close();
+          }}
         />
-        {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
+      )}
+    >
+      <BottomSheetScrollView keyboardShouldPersistTaps="always" style={styles.bottomSheetScrollViewContainer}>
+        <BottomSheetView style={styles.bottomSheetInputs}>
+          <Controller
+            control={control}
+            rules={{
+              required: 'Task name is required',
+            }}
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              <>
+                <BottomSheetTextInput
+                  ref={taskNameInputRef}
+                  placeholder="Task name"
+                  style={styles.titleInput}
+                  placeholderTextColor={Colors.lightText}
+                  cursorColor={Colors.primary}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  onSubmitEditing={() => handleSubmit(onSubmit)} // Allow submit via keyboard
+                  autoCorrect={false}
+                />
+              </>
+            )}
+            name="name"
+          />
 
-        <Controller
-          control={control}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <BottomSheetTextInput
-              placeholder="Description"
-              style={styles.descriptionInput}
-              placeholderTextColor={Colors.lightText}
-              cursorColor={Colors.primary}
-              multiline={true}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
+          <Controller
+            control={control}
+            rules={{
+              // Add any validation rules for description if needed
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <BottomSheetTextInput
+                placeholder="Description"
+                style={styles.descriptionInput}
+                placeholderTextColor={Colors.lightText}
+                cursorColor={Colors.primary}
+                multiline={true}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                autoCorrect={false}
+                value={value || ''} // Ensure value is not undefined
+              />
+            )}
+            name="description"
+          />
+          <BottomSheetScrollView
+            keyboardShouldPersistTaps="always"
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.actionButtonsContainer}
+            contentContainerStyle={{ alignItems: 'center', gap: 8 }} // Added gap
+          >
+            <Chip icon="calendar-outline"
+              iconColor={getDateObject(selectedDate).color}
+              label={getDateObject(selectedDate).name}
+              onPress={changeDate}
+              borderColor={getDateObject(selectedDate).color}
+              labelColor={getDateObject(selectedDate).color}
             />
-          )}
-          name="description"
-        />
+            <Chip icon="flag-outline" label="Priority" onPress={() => console.log("Priority Pressed")} />
+            <Chip icon="location-outline" label="Location" onPress={() => console.log("Location Pressed")} />
+            <Chip icon="pricetags-outline" label="Label" onPress={() => console.log("Label Pressed")} />
+            <Chip icon="time-outline" label="Time" />
+          </BottomSheetScrollView>
+        </BottomSheetView>
 
-        <BottomSheetScrollView
-          keyboardShouldPersistTaps="always"
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.actionButtonsContainer}
-          contentContainerStyle={{ alignItems: 'center' }}
-        >
-          <Chip icon="calendar-outline" label="Date" onPress={changeDate} />
-          <Chip icon="flag-outline" label="Priority" onPress={() => console.log("Priority chip pressed")} />
-          <Chip icon="location-outline" label="Location" onPress={() => console.log("Location chip pressed")} />
-          <Chip icon="pricetags-outline" label="Label" onPress={() => console.log("Label chip pressed")} />
-          <Chip icon="time-outline" label="Time" onPress={() => console.log("Time chip pressed")} />
-        </BottomSheetScrollView>
-      </BottomSheetView>
-
-      <BottomSheetView style={styles.bottomSheetFooter}>
-        <Pressable style={({ pressed }) => [
-          styles.outlinedButton,
-          { backgroundColor: pressed ? Colors.lightBorder : 'transparent' }
-        ]}
-        onPress={() => console.log("Project selector pressed")}
-        >
-          <Text style={styles.outlinedButtonText}><Text style={{ color: selectedProject?.color || Colors.primary }}># </Text>{selectedProject?.name || 'Project'}</Text>
-        </Pressable>
-
-        <Pressable
-            style={({ pressed }) => [
-            styles.submitButton,
-            { opacity: errors.name || !control._formValues.name ? 0.5 : (pressed ? 0.8 : 1) }
+        <BottomSheetView style={styles.bottomSheetFooter}>
+          <Pressable style={({ pressed }) => [
+            styles.outlinedButton,
+            {
+              backgroundColor: pressed ? Colors.lightBorder : 'transparent'
+            }
           ]}
-          onPress={handleSubmit(onSubmit)}
-          disabled={!!errors.name || !control._formValues.name}
-        >
-          <Ionicons name="arrow-up-outline" size={24} color={"#ffffff"} />
-        </Pressable>
-      </BottomSheetView>
-    </>
+            onPress={() => console.log("Select Project Pressed")}
+          >
+            {/* TODO: Update project display */}
+            <Text style={styles.outlinedButtonText}><Text style={{ color: selectedProject.color || Colors.primary }}># </Text>{selectedProject.name}</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [
+              styles.submitButton,
+              { opacity: !isValid || pressed ? 0.6 : 1 } // Use isValid from formState and pressed state
+            ]}
+            onPress={handleSubmit(onSubmit)}
+            disabled={!isValid} // Disable button if form is invalid
+          >
+            <Ionicons name="arrow-up-outline" size={24} color={"#ffffff"} />
+          </Pressable>
+        </BottomSheetView>
+      </BottomSheetScrollView>
+    </BottomSheet>
   );
 };
 
+// Styles extracted from _layout.tsx
 const styles = StyleSheet.create({
+  bottomSheet: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+  },
   bottomSheetInputs: {
+    flex: 0,
     gap: 12,
-    paddingHorizontal: 16,
   },
   titleInput: {
+    // paddingHorizontal: 16,
     fontSize: 20,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.lightBorder,
-    paddingBottom: 8,
   },
   descriptionInput: {
-    fontSize: 16,
-    minHeight: 60,
+    // paddingHorizontal: 16,
+    fontSize: 18,
   },
-  inputError: {
-    borderColor: 'red',
-    borderBottomColor: 'red',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: -8,
-    marginBottom: 8,
+  closeButtonContainer: {
+    alignItems: 'flex-end',
+    paddingHorizontal: 16,
   },
   actionButtonsContainer: {
     flexDirection: 'row',
     height: 50,
-    maxHeight: 50,
-    marginTop: 8,
   },
   bottomSheetFooter: {
     borderTopWidth: StyleSheet.hairlineWidth,
     borderColor: Colors.lightBorder,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginTop: 16,
+    marginBottom: 16,
   },
   submitButton: {
     backgroundColor: Colors.primary,
@@ -260,16 +316,23 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
+    marginRight: 8,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
     maxHeight: 40,
     minWidth: 80,
-    gap: 4,
+    // maxWidth: 200,
+    gap: 8,
   },
   outlinedButtonText: {
     fontSize: 14,
     fontWeight: '500',
     color: Colors.dark,
   },
+  bottomSheetScrollViewContainer: {
+    flex: 1,
+    paddingVertical: 16,
+    marginBottom: 16,
+  }
 }); 
