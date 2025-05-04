@@ -274,6 +274,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   bottomSheetInputs: {
+    paddingHorizontal: 16,
     flex: 0,
     gap: 12,
   },
