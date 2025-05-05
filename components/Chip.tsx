@@ -2,8 +2,15 @@ import { Colors } from "@/constants/Colors"
 import { Ionicons } from "@expo/vector-icons"
 import { Pressable, PressableProps, StyleSheet, Text } from "react-native"
 
-export const Chip = (props: { icon: keyof typeof Ionicons.glyphMap, label: string, borderColor?: string, iconColor?: string, labelColor?: string } & PressableProps ) => {
-    const { icon, label, borderColor, iconColor, labelColor, ...rest } = props;
+export const Chip = (props: {
+    label: string,
+    borderColor?: string,
+    icon: keyof typeof Ionicons.glyphMap,
+    iconColor?: string,
+    iconSize?: number,
+    labelColor?: string
+} & PressableProps) => {
+    const { icon, label, borderColor, iconColor, labelColor, iconSize = 24, ...rest } = props;
     return (
         <Pressable style={({ pressed }) => [
             styles.outlinedButton,
@@ -12,7 +19,7 @@ export const Chip = (props: { icon: keyof typeof Ionicons.glyphMap, label: strin
                 borderColor: borderColor || Colors.lightBorder
             }
         ]} {...rest}>
-            <Ionicons name={icon} size={24} color={iconColor || Colors.dark} />
+            <Ionicons name={icon} size={iconSize} color={iconColor || Colors.dark} />
             <Text style={[styles.outlinedButtonText, { color: labelColor || Colors.dark }]}>{label}</Text>
         </Pressable>
     )
@@ -30,7 +37,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         maxHeight: 40,
         minWidth: 80,
-        // maxWidth: 200,
         gap: 8,
     },
     outlinedButtonText: {

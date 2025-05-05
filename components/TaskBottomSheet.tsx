@@ -1,6 +1,5 @@
 import React, { useRef, useCallback, ElementRef, useState, useEffect } from "react";
-import { Platform, Keyboard, StyleSheet, Pressable, Text, View } from "react-native";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Keyboard, StyleSheet, Pressable, Text, Modal, Dimensions } from "react-native";
 import BottomSheet, { BottomSheetView, BottomSheetTextInput, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useBottomSheet } from '@/context/BottomSheetContext';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
@@ -36,8 +35,8 @@ export const TaskBottomSheet = ({ todo }: TaskBottomSheetProps) => {
   const db = useSQLiteContext();
   const drizzleDb = drizzle(db);
 
-  // TODO: Fetch projects properly, maybe pass as prop or fetch here if needed for project selection
-  // const { data: projectData } = useLiveQuery(drizzleDb.select().from(projects));
+  const { data: projectsData } = useLiveQuery(drizzleDb.select().from(projects));
+  const [showProjects, setShowProjects] = useState(false);
 
   const [selectedProject, setSelectedProject] = useState<Project>(
     todo?.project_id ? {
@@ -243,13 +242,15 @@ export const TaskBottomSheet = ({ todo }: TaskBottomSheetProps) => {
           <Pressable style={({ pressed }) => [
             styles.outlinedButton,
             {
-              backgroundColor: pressed ? Colors.lightBorder : 'transparent'
+              backgroundColor: pressed ? Colors.lightBorder : 'transparent',
+              borderColor: Colors.lightBorder
             }
           ]}
-            onPress={() => console.log("Select Project Pressed")}
+            onPress={() => setShowProjects(true)}
           >
-            {/* TODO: Update project display */}
-            <Text style={styles.outlinedButtonText}><Text style={{ color: selectedProject.color || Colors.primary }}># </Text>{selectedProject.name}</Text>
+            <Ionicons name={selectedProject.id == 1 ? "file-tray-outline" : "caret-down"} size={selectedProject.id == 1 ? 20 : 14} color={Colors.dark} />
+            <Text style={[styles.outlinedButtonText, { color: selectedProject.color }]}>{selectedProject.name}</Text>
+            <Ionicons name={selectedProject.id == 1 ? "caret-down" : "caret-up"} size={20} color={Colors.dark} />
           </Pressable>
           <Pressable
             style={({ pressed }) => [
@@ -335,5 +336,5 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 16,
     marginBottom: 16,
-  }
+  },
 }); 
