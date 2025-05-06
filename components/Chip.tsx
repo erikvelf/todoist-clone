@@ -2,6 +2,43 @@ import { Colors } from "@/constants/Colors"
 import { Ionicons } from "@expo/vector-icons"
 import { Pressable, PressableProps, StyleSheet, Text } from "react-native"
 
+/**
+ * A customizable Chip component that displays a label and an icon.
+ * It can be used as a button.
+ *
+ * @param {object} props - The properties for the Chip component.
+ * @param {string} props.label - The text label to display on the chip.
+ * @param {string} [props.borderColor] - The color of the chip's border. Defaults to `Colors.lightBorder`.
+ * @param {keyof typeof Ionicons.glyphMap} props.icon - The name of the icon to display from `Ionicons.glyphMap`.
+ * @param {string} [props.iconColor] - The color of the icon. Defaults to `Colors.dark`.
+ * @param {number} [props.iconSize] - The size of the icon. Defaults to 24.
+ * @param {string} [props.labelColor] - The color of the label text. Defaults to `Colors.dark`.
+ * @param {PressableProps} [props.rest] - Any other props to be passed to the underlying `Pressable` component.
+ *
+ * @example
+ * // Basic usage with required props
+ * <Chip label="Inbox" icon="mail-outline" />
+ *
+ * @example
+ * // Customized chip with specific colors and icon size
+ * <Chip
+ *   label="Priority"
+ *   icon="flag-outline"
+ *   borderColor="red"
+ *   iconColor="red"
+ *   labelColor="red"
+ *   iconSize={20}
+ *   onPress={() => console.log('Priority chip pressed')}
+ * />
+ *
+ * @example
+ * // Chip with a different icon
+ * <Chip
+ *  label="Today"
+ *  icon="calendar-outline"
+ *  onPress={() => console.log('Calendar chip pressed')}
+ * />
+ */
 export const Chip = (props: {
     label: string,
     borderColor?: string,
