@@ -259,15 +259,14 @@ export const TaskBottomSheet = ({ todo }: TaskBottomSheetProps) => {
             }
           ]}
             onPress={() => {
-              bottomSheetRef.current?.snapToIndex(0);
+              bottomSheetRef.current?.snapToIndex(1);
+              Keyboard.dismiss();
               try {
                 setPreviouslySelectedProject(JSON.stringify(selectedProject));
               } catch (e) {
                 console.error("Failed to save current project to MMKV in TaskBottomSheet:", e);
               }
               router.push('/task/project-select');
-              bottomSheetRef.current?.snapToIndex(1);
-              Keyboard.dismiss();
             }}
           >
             <Ionicons name={selectedProject.id == 1 ? "file-tray-outline" : "caret-down"} size={selectedProject.id == 1 ? 20 : 14} color={Colors.dark} />
