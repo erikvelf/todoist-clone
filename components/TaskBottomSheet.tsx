@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, ElementRef, useState, useEffect } from "react";
-import { Keyboard, StyleSheet, Pressable, Text, Modal, Dimensions } from "react-native";
+import { Keyboard, StyleSheet, Pressable, Text, Modal, Dimensions, View, Animated, TouchableOpacity, FlatList } from "react-native";
 import BottomSheet, { BottomSheetView, BottomSheetTextInput, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useBottomSheet } from '@/context/BottomSheetContext';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
@@ -36,17 +36,15 @@ export const TaskBottomSheet = ({ todo }: TaskBottomSheetProps) => {
   const drizzleDb = drizzle(db);
 
   const { data: projectsData } = useLiveQuery(drizzleDb.select().from(projects));
-  const [showProjects, setShowProjects] = useState(false);
-
   const [selectedProject, setSelectedProject] = useState<Project>(
     todo?.project_id ? {
-      id: Number(todo.project_id), // Ensure ID is number if needed
+      id: Number(todo.project_id),
       name: todo.project_name,
       color: todo.project_color
     } : {
       id: 1, // inbox
       name: 'Inbox',
-      color: '#000000' // Default color or fetch from DB/constants
+      color: '#000000'
     }
   );
 
@@ -55,6 +53,7 @@ export const TaskBottomSheet = ({ todo }: TaskBottomSheetProps) => {
   );
 
   const [previouslySelectedDate, setPreviouslySelectedDate] = useMMKVString('selectedDate');
+  const [previouslySelectedProject, setPreviouslySelectedProject] = useMMKVString('tempSelectedProjectObject');
 
   useEffect(() => {
     if (previouslySelectedDate) {
@@ -62,6 +61,19 @@ export const TaskBottomSheet = ({ todo }: TaskBottomSheetProps) => {
       setPreviouslySelectedDate(undefined);
     }
   }, [previouslySelectedDate, setPreviouslySelectedDate]);
+
+  useEffect(() => {
+    if (previouslySelectedProject) {
+      try {
+        // const projectFromMMKV = JSON.parse(previouslySelectedProject) as Project;
+        setSelectedProject(() => JSON.parse(previouslySelectedProject) as Project);
+      } catch (e) {
+        console.error("Failed to parse project from MMKV in TaskBottomSheet:", e);
+      } finally {
+        setPreviouslySelectedProject(undefined); // Clear after processing
+      }
+    }
+  }, [previouslySelectedProject, setSelectedProject, setPreviouslySelectedProject]);
 
   const { control, handleSubmit, reset, trigger, formState: { errors, isValid } } = useForm<TodoFormData>({
     defaultValues: {
@@ -246,7 +258,17 @@ export const TaskBottomSheet = ({ todo }: TaskBottomSheetProps) => {
               borderColor: Colors.lightBorder
             }
           ]}
-            onPress={() => setShowProjects(true)}
+            onPress={() => {
+              bottomSheetRef.current?.snapToIndex(0);
+              try {
+                setPreviouslySelectedProject(JSON.stringify(selectedProject));
+              } catch (e) {
+                console.error("Failed to save current project to MMKV in TaskBottomSheet:", e);
+              }
+              router.push('/task/project-select');
+              bottomSheetRef.current?.snapToIndex(1);
+              Keyboard.dismiss();
+            }}
           >
             <Ionicons name={selectedProject.id == 1 ? "file-tray-outline" : "caret-down"} size={selectedProject.id == 1 ? 20 : 14} color={Colors.dark} />
             <Text style={[styles.outlinedButtonText, { color: selectedProject.color }]}>{selectedProject.name}</Text>
@@ -332,9 +354,38 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: Colors.dark,
   },
+  modalContainer: {
+    // don't use flex: 1 here, it will break the modal
+    // backgroundColor: '#abcdef',
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   bottomSheetScrollViewContainer: {
     flex: 1,
     paddingVertical: 16,
     marginBottom: 16,
+  },
+  modalContent: {
+    backgroundColor: "#ffffff",
+    justifyContent: 'center',
+    // alignItems: 'center',
+    width: Dimensions.get('window').width - 60,
+    height: 200,
+    borderRadius: 5,
+  },
+  projectButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 14,
+    borderRadius: 5,
+    gap: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.lightBorder,
+  },
+  projectButtonText: {
+    fontSize: 16,
   },
 }); 
