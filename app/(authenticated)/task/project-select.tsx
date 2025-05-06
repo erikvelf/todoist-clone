@@ -14,7 +14,7 @@ const Page = () => {
   const drizzleDb = drizzle(db);
   const router = useRouter();
   const { data: projectsData } = useLiveQuery(drizzleDb.select().from(projects));
-  const [_, setMmkvProject] = useMMKVString('tempSelectedProjectObject');
+  const [_, setSelectedProject] = useMMKVString('tempSelectedProjectObject');
 
   return (
     <View style={styles.modalContainer}>
@@ -26,7 +26,7 @@ const Page = () => {
             <TouchableOpacity style={styles.projectButton} onPress={() => {
               try {
                 // item is a complete project object from projectsData
-                setMmkvProject(JSON.stringify(projectData));
+                setSelectedProject(JSON.stringify(projectData));
               } catch (e) {
                 console.error("Failed to save selected project to MMKV in project-select:", e);
                 // Optionally, inform the user or handle the error further

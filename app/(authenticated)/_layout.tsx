@@ -52,6 +52,17 @@ const Layout = () => {
           backgroundColor: Colors.background,
         },
       }} />
+      <Stack.Screen name="task/project-select" options={{
+        presentation: "modal",
+        title: "Select Project",
+        headerTitleAlign: "center",
+        headerLeft: () => (Platform.OS === "ios" ? <Button title="Cancel" color={Colors.primary} onPress={() => router.dismiss()} /> : null),
+        headerRight: () => (
+          <Pressable onPress={() => router.back()}>
+            <Text style={styles.doneButton}>Done</Text>
+          </Pressable>
+        ),
+      }} />
     </Stack>
   );
 };
