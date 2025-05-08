@@ -1,6 +1,6 @@
 import { Stack, useRouter } from "expo-router";
 import { Colors } from "@/constants/Colors";
-import { Button, Platform, View } from "react-native";
+import { Button, Platform } from "react-native";
 
 const Layout = () => {
   const router = useRouter();
@@ -15,7 +15,7 @@ const Layout = () => {
       <Stack.Screen name="index" options={{
         headerTransparent: true,
         title: "New Project",
-        headerLeft: () => (Platform.OS === "ios" ? <Button title="Cancel" color={Colors.primary} onPress={() => router.dismiss()} /> : null),
+        headerLeft: () => Platform.OS === "ios" ? <Button title="Cancel" color={Colors.primary} onPress={() => router.dismiss()} /> : null,
       }}/>
       <Stack.Screen name="color-select" options={{
         headerTitle: "Color",

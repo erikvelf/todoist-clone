@@ -1,4 +1,3 @@
-import { CancelButton } from "@/components/CancelButton";
 import { Colors } from "@/constants/Colors";
 import { Stack, useRouter } from "expo-router";
 import { Pressable, useWindowDimensions, Text, StyleSheet, Platform, Button } from "react-native";
@@ -42,8 +41,8 @@ const Layout = () => {
       <Stack.Screen name="task/date-select" options={{
         presentation: "modal",
         title: "Schedule",
+        headerLeft: () => Platform.OS === "ios" ? <Button title="Cancel" color={Colors.primary} onPress={() => router.dismiss()} /> : null,
         headerTitleAlign: "center",
-        headerLeft: () => (<CancelButton />),
         headerRight: () => (
           <Pressable onPress={() => router.back()}>
             <Text style={styles.doneButton}>Done</Text>
@@ -57,7 +56,7 @@ const Layout = () => {
         presentation: "modal",
         title: "Select Project",
         headerTitleAlign: "center",
-        headerLeft: () => (<CancelButton />),
+        headerLeft: () => Platform.OS === "ios" ? <Button title="Cancel" color={Colors.primary} onPress={() => router.dismiss()} /> : null,
         headerRight: () => (
           <Pressable onPress={() => router.back()}>
             <Text style={styles.doneButton}>Done</Text>
