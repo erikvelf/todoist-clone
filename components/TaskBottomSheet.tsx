@@ -269,10 +269,11 @@ export const TaskBottomSheet = ({ todo }: TaskBottomSheetProps) => {
               router.push('/task/project-select');
             }}
           >
+            <Text style={[styles.outlinedButtonText, { color: selectedProject.color }]}>{selectedProject.id == 1 ? "Inbox" : `# ${selectedProject.name}`}</Text>
+            {/* {selectedProject.id != 1 && <Ionicons name={"caret-down"} size={20} color={Colors.dark} />} */}
             <Ionicons name={selectedProject.id == 1 ? "file-tray-outline" : "caret-down"} size={selectedProject.id == 1 ? 20 : 14} color={Colors.dark} />
-            <Text style={[styles.outlinedButtonText, { color: selectedProject.color }]}>{selectedProject.name}</Text>
-            <Ionicons name={selectedProject.id == 1 ? "caret-down" : "caret-up"} size={20} color={Colors.dark} />
           </Pressable>
+
           <Pressable
             style={({ pressed }) => [
               styles.submitButton,
