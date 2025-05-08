@@ -1,12 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
+import React from 'react'
 import { FlatList, TouchableOpacity } from 'react-native'
 import { useSQLiteContext } from 'expo-sqlite'
 import { drizzle, useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { projects } from '@/db/schema'
 import { Colors } from '@/constants/Colors'
 import { useMMKVString } from 'react-native-mmkv'
-import { Project } from '@/types/interfaces'
 import { useRouter } from 'expo-router';
 
 const Page = () => {
@@ -17,7 +16,6 @@ const Page = () => {
   const [_, setSelectedProject] = useMMKVString('tempSelectedProjectObject');
 
   return (
-    <View style={styles.modalContainer}>
       <View style={styles.modalContent}>
         <FlatList
           data={projectsData}
@@ -38,34 +36,28 @@ const Page = () => {
             </TouchableOpacity>)}
         />
       </View>
-    </View>
   )
 }
 
 export default Page
 
 const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   modalContent: {
-    width: '100%',
-    height: '100%',
+    flex: 1,
     backgroundColor: 'white',
     borderRadius: 10,
-    padding: 20,
+    // padding: 20,
   },
   projectButton: {
+    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
     padding: 14,
     borderRadius: 5,
     gap: 14,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.lightBorder,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.lightBorder,
   },
   projectButtonText: {
     fontSize: 16,
