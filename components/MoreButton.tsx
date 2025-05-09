@@ -8,6 +8,32 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 
 
+/**
+ * @typedef {object} MoreButtonProps - Props for the MoreButton component.
+ * @property {string} pageName - The name of the current page, used to construct a deep link URL.
+ */
+
+/**
+ * Renders a "more options" button that opens a dropdown menu.
+ * The menu includes actions like copying a page link, selecting a task,
+ * viewing details, and opening an activity log.
+ *
+ * @param {MoreButtonProps} props - The props for the component.
+ * @returns {JSX.Element} A DropdownMenu component with various options.
+ *
+ * @example
+ * // Usage in a screen component
+ * import MoreButton from '@/components/MoreButton';
+ *
+ * const MyScreen = () => {
+ *   return (
+ *     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+ *       <Text>Today</Text>
+ *       <MoreButton pageName="Today" />
+ *     </View>
+ *   );
+ * }
+ */
 type MoreButtonProps = {
   pageName: string;
 }
@@ -48,6 +74,7 @@ const MoreButton = ({ pageName }: MoreButtonProps) => {
               height={24}
               width={24}
             />
+            <DropdownMenu.ItemIcon androidIconName="sym_action_email" />
           </DropdownMenu.Item>
 
           <DropdownMenu.Item key="view">
@@ -57,6 +84,7 @@ const MoreButton = ({ pageName }: MoreButtonProps) => {
               height={24}
               width={24}
             />
+          <DropdownMenu.ItemIcon androidIconName="ic_menu_view" />
         </DropdownMenu.Item>
 
           <DropdownMenu.Item key="activity">
@@ -66,8 +94,13 @@ const MoreButton = ({ pageName }: MoreButtonProps) => {
               height={24}
               width={24}
             />
-        </DropdownMenu.Item>
-      </DropdownMenu.Group>
+            {/* <DropdownMenu.ItemIcon 
+              androidIconName="ic_menu_recent_history"
+              style={{ color: Colors.dark }}
+            /> */}
+            
+          </DropdownMenu.Item>
+        </DropdownMenu.Group>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   );
