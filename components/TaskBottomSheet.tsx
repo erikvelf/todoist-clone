@@ -14,6 +14,7 @@ import { eq } from "drizzle-orm";
 import { useRouter } from "expo-router";
 import { useMMKVString } from "react-native-mmkv";
 import getDateObject from "@/utils/getDateObject";
+import { PROJECT_DEFAULTS } from "@/constants/Defaults";
 
 interface TodoFormData {
   name: string;
@@ -27,9 +28,9 @@ interface TaskBottomSheetProps {
 
 const snapPoints = ['25%'];
 
-export const TaskBottomSheet = ({ todo }: TaskBottomSheetProps) => {
+export const TaskBottomSheet = () => {
   const router = useRouter();
-  const { bottomSheetRef } = useBottomSheet();
+  const { bottomSheetRef, selectedTask: todo } = useBottomSheet();
   const taskNameInputRef = useRef<ElementRef<typeof BottomSheetTextInput>>(null);
 
   const db = useSQLiteContext();
@@ -39,8 +40,8 @@ export const TaskBottomSheet = ({ todo }: TaskBottomSheetProps) => {
   const [selectedProject, setSelectedProject] = useState<Project>(
     todo?.project_id ? {
       id: Number(todo.project_id),
-      name: todo.project_name,
-      color: todo.project_color
+      name: todo.project_name || PROJECT_DEFAULTS.name,
+      color: todo.project_color || PROJECT_DEFAULTS.color
     } : {
       id: 1, // inbox
       name: 'Inbox',
@@ -103,14 +104,14 @@ export const TaskBottomSheet = ({ todo }: TaskBottomSheetProps) => {
       setSelectedDate(todo.due_date ? new Date(todo.due_date) : new Date());
       setSelectedProject({
         id: Number(todo.project_id),
-        name: todo.project_name,
-        color: todo.project_color
+        name: todo.project_name || PROJECT_DEFAULTS.name,
+        color: todo.project_color || PROJECT_DEFAULTS.color
       });
     } else {
       // Reset if no todo is passed (e.g., opening for new task)
       reset({ name: '', description: '' });
       setSelectedDate(new Date());
-      setSelectedProject({ id: 1, name: 'Inbox', color: '#000000' });
+      setSelectedProject(PROJECT_DEFAULTS);
     }
     trigger(); // Trigger validation after reset/initial load
   }, [todo, reset, trigger, setSelectedDate, setSelectedProject]);
