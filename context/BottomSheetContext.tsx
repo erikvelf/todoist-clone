@@ -16,8 +16,8 @@ export const BottomSheetProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   // Function to open the bottom sheet with a task
  const openBottomSheetWithTask = (task: Todo) => {
+    bottomSheetRef.current?.snapToIndex(1);
     setSelectedTask(task);
-    bottomSheetRef.current?.expand();
   };
 
   return (
