@@ -34,7 +34,9 @@ export const CustomDayComponent: React.FC<InnerDayProps<Record<string, unknown>>
   // const isToday = day.toDateString() === today.toDateString();
   const backgroundColor = isSelected 
     ? Colors.primary 
-    : 'transparent';
+    : isToday 
+      ? '#FF00004D' // Fainted red for today
+      : 'transparent';
 
 
   return (
