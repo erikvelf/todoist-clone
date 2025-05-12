@@ -8,7 +8,7 @@ const Layout = () => {
     <Stack
       screenOptions={{
         headerShadowVisible: false,
-        contentStyle: { backgroundColor: Colors.background }, // sets the background color of the page
+        contentStyle: { backgroundColor: Colors.backgroundAlt }, // sets the background color of the page
       }}
     >
       <Stack.Screen
