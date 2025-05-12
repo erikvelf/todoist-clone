@@ -1,7 +1,14 @@
 import { Colors } from "@/constants/Colors";
 import { View, Text } from "react-native";
+import React from "react";
+import type { InnerDayProps } from "@fowusu/calendar-kit";
 
-export const CalendarMonthName = ({ month, locale }: { month: Date; locale?: string }) => (
+export interface CalendarMonthNameProps {
+  month: Date;
+  locale?: string;
+}
+
+export const CalendarMonthName: React.FC<CalendarMonthNameProps> = ({ month, locale }) => (
   <View style={{ backgroundColor: Colors.primary, paddingVertical: 8, borderRadius: 8, marginBottom: 4 }}>
     <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18, textAlign: 'center' }}>
       {month.toLocaleDateString(locale || 'en-US', { month: 'long', year: 'numeric' })}
@@ -9,7 +16,11 @@ export const CalendarMonthName = ({ month, locale }: { month: Date; locale?: str
   </View>
 );
 
-export const WeekDayNameComponent = ({ weekDays }: { weekDays: string[] }) => (
+export interface WeekDayNameComponentProps {
+  weekDays: string[];
+}
+
+export const WeekDayNameComponent: React.FC<WeekDayNameComponentProps> = ({ weekDays }) => (
   <View style={{ flexDirection: 'row', backgroundColor: Colors.primary, borderRadius: 8, marginBottom: 4 }}>
     {weekDays.map((day, idx) => (
       <View key={day + idx} style={{ flex: 1, alignItems: 'center', paddingVertical: 4 }}>
@@ -19,9 +30,12 @@ export const WeekDayNameComponent = ({ weekDays }: { weekDays: string[] }) => (
   </View>
 );
 
-export const CustomDayComponent = ({ day, isSelected, isToday, state, locale }: any) => {
-  // Only color the selected day
-  const backgroundColor = isSelected ? Colors.primary : 'transparent';
+export const CustomDayComponent: React.FC<InnerDayProps<Record<string, unknown>>> = ({ day, isSelected, isToday, state, locale }) => {
+  // const isToday = day.toDateString() === today.toDateString();
+  const backgroundColor = isSelected 
+    ? Colors.primary 
+    : 'transparent';
+
 
   return (
     <View style={{
