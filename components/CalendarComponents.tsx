@@ -1,7 +1,12 @@
 import { Colors } from "@/constants/Colors";
 import { View, Text, StyleSheet } from "react-native";
-import React from "react";
+import React, { useMemo } from "react";
 import type { InnerDayProps } from "@fowusu/calendar-kit";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { todos } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { format, startOfDay, endOfDay } from "date-fns";
 
 export interface CalendarMonthNameProps {
   month: Date;
@@ -30,11 +35,38 @@ export const WeekDayNameComponent: React.FC<WeekDayNameComponentProps> = ({ week
   </View>
 );
 
-export const CustomDayComponent: React.FC<InnerDayProps<Record<string, unknown>>> = ({ 
+// Custom state creator function to determine if a day has todos
+export const createDayState = (day: Date) => {
+  const db = useSQLiteContext();
+  const drizzleDb = drizzle(db);
+  
+  // Get all incomplete todos
+  const { data: allTodos } = useLiveQuery(
+    drizzleDb
+      .select()
+      .from(todos)
+      .where(eq(todos.completed, 0))
+  );
+
+  // Check if there are any todos for this day
+  const hasTodos = allTodos?.some(todo => {
+    if (!todo.due_date) return false;
+    const todoDate = new Date(todo.due_date);
+    return startOfDay(todoDate).getTime() === startOfDay(day).getTime();
+  });
+
+  return hasTodos ? 'active' : 'inactive';
+};
+
+interface CustomDayProps extends InnerDayProps<Record<string, unknown>> {
+  isMarked?: boolean;
+}
+
+export const CustomDayComponent: React.FC<CustomDayProps> = ({ 
   day, 
   isSelected, 
   isToday, 
-  state, 
+  isMarked,
   locale 
 }) => {
   let containerStyle = [styles.dayContainer];
@@ -52,13 +84,13 @@ export const CustomDayComponent: React.FC<InnerDayProps<Record<string, unknown>>
       <Text style={textStyle}>
         {day.toLocaleDateString(locale || 'en-US', { day: 'numeric' })}
       </Text>
+      {isSelected && <View style={[styles.dot, { backgroundColor: Colors.backgroundAlt }]} />}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   dot: {
-    backgroundColor: Colors.dark,
     width: 4,
     height: 4,
     borderRadius: 2,
@@ -69,8 +101,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
-    borderWidth: 1,
-    borderColor: 'red',
   },
   dotCount: {
     fontSize: 10,
