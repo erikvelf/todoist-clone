@@ -11,7 +11,8 @@ import { useEffect, useState } from "react";
 import { Colors } from "@/constants/Colors";
 import TaskRow from "@/components/TaskRow";
 import { Calendar, toLocaleDateString } from "@fowusu/calendar-kit";
-import { CalendarMonthName, CustomDayComponent, WeekDayNameComponent } from "@/components/CalendarComponents";
+import { CalendarMonthName, CustomDayComponent, WeekDayNameComponent, useMarkedDates } from "@/components/CalendarComponents";
+import { CustomStateCreator } from "@/utils/CustomStateCreator";
 
 interface Section {
 	title: string;
@@ -40,29 +41,7 @@ const Page = () => {
 	const [sectionListData, setSectionListData] = useState<Section[]>([]);
 
 	// Calculate marked dates for todos
-	const markedDates = useMemo(() => {
-		if (!allTodos) return [selectedDay];
-
-		const dates = new Set<string>();
-		const today = new Date();
-
-		// Only add selected day if it's not today
-		if (!isSameDay(new Date(selectedDay), today)) {
-			dates.add(selectedDay);
-		}
-
-		allTodos.forEach(todo => {
-			if (todo.todos.due_date) {
-				const todoDate = new Date(todo.todos.due_date);
-				// Only add the date if it's not today
-				if (!isSameDay(todoDate, today)) {
-					dates.add(toLocaleDateString(todoDate));
-				}
-			}
-		});
-
-		return Array.from(dates);
-	}, [allTodos, selectedDay]);
+	const markedDates = useMarkedDates();
 
 	useEffect(() => {
 		const formattedData: Todo[] = allTodos?.map((item) => ({
@@ -106,9 +85,10 @@ const Page = () => {
 				MonthNameComponent={CalendarMonthName}
 				WeekDayNameComponent={WeekDayNameComponent}
 				DayComponent={CustomDayComponent}
-				date={todayDateString}
+				date={selectedDay}
 				markedDates={markedDates}
 				onDayPress={onDayPress}
+				customStateCreator={CustomStateCreator}
 				viewAs="week"
 			/>
 			<SectionList

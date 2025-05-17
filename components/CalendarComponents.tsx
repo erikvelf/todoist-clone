@@ -58,33 +58,31 @@ export const createDayState = (day: Date) => {
   return hasTodos ? 'active' : 'inactive';
 };
 
-interface CustomDayProps extends InnerDayProps<Record<string, unknown>> {
-  isMarked?: boolean;
-}
+interface CustomDayProps extends InnerDayProps<Record<string, unknown>> {}
 
 export const CustomDayComponent: React.FC<CustomDayProps> = ({ 
   day, 
   isSelected, 
   isToday, 
-  isMarked,
-  locale 
+  locale,
+  state
 }) => {
+  const hasTodos = state === 'active';
+  
   let containerStyle = [styles.dayContainer];
   let textStyle = [styles.dayText];
 
-  if (isSelected) {
-    containerStyle.push(styles.selectedDayContainer);
-    textStyle.push(styles.selectedDayText);
-  } else if (isToday) {
-    textStyle.push(styles.todayText);
-  }
-
   return (
     <View style={containerStyle}>
-      <Text style={textStyle}>
+      <Text style={[textStyle, isToday && { color: Colors.primary }]}>
         {day.toLocaleDateString(locale || 'en-US', { day: 'numeric' })}
       </Text>
-      {isSelected && <View style={[styles.dot, { backgroundColor: Colors.backgroundAlt }]} />}
+      <View style={[
+        styles.dot, 
+        { 
+          backgroundColor: isSelected && hasTodos ? Colors.primary : 'transparent'
+        }
+      ]} />
     </View>
   );
 };
@@ -94,7 +92,7 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    marginTop: 2,
+    marginTop: 4,
   },
   dotRow: {
     flexDirection: 'row',
@@ -120,27 +118,41 @@ const styles = StyleSheet.create({
     minWidth: 36,
     minHeight: 36,
     backgroundColor: 'transparent',
+    padding: 4,
   },
   selectedDayContainer: {
-    borderRadius: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 2,
-    aspectRatio: 1,
-    minWidth: 36,
-    minHeight: 36,
     backgroundColor: Colors.primary,
   },
   dayText: {
     fontSize: 16,
+    color: Colors.dark,
   },
   selectedDayText: {
-    color: '#fff',
-    fontSize: 16,
+    color: Colors.background,
   },
   todayText: {
     color: Colors.primary,
     fontWeight: 'bold',
-    fontSize: 16,
   }
 })
+
+// Add this hook to get marked dates
+export const useMarkedDates = () => {
+  const db = useSQLiteContext();
+  const drizzleDb = drizzle(db);
+  
+  const { data: incompleteTodos } = useLiveQuery(
+    drizzleDb
+      .select()
+      .from(todos)
+      .where(eq(todos.completed, 0))
+  );
+
+  return useMemo(() => {
+    if (!incompleteTodos) return [];
+    
+    return incompleteTodos
+      .filter(todo => todo.due_date)
+      .map(todo => format(new Date(todo.due_date!), 'yyyy-MM-dd'));
+  }, [incompleteTodos]);
+};
