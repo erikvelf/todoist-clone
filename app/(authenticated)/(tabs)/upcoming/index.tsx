@@ -1,18 +1,17 @@
 import Fab from "@/components/Fab";
-import { StyleSheet, View, Text, SectionList } from "react-native";
-import React, { useCallback, useMemo } from "react";
+import { StyleSheet, Text, SectionList } from "react-native";
+import React, { useCallback } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { eq } from "drizzle-orm";
 import { projects, todos } from "@/db/schema";
-import { format, startOfDay, isSameDay } from "date-fns";
+import { format } from "date-fns";
 import { Todo } from "@/types/interfaces";
 import { useEffect, useState } from "react";
 import { Colors } from "@/constants/Colors";
 import TaskRow from "@/components/TaskRow";
 import { Calendar, toLocaleDateString } from "@fowusu/calendar-kit";
 import { CalendarMonthName, CustomDayComponent, WeekDayNameComponent, useMarkedDates } from "@/components/CalendarComponents";
-import { CustomStateCreator } from "@/utils/CustomStateCreator";
 
 interface Section {
 	title: string;
@@ -88,20 +87,16 @@ const Page = () => {
 				date={selectedDay}
 				markedDates={markedDates}
 				onDayPress={onDayPress}
-				customStateCreator={CustomStateCreator}
 				viewAs="week"
 			/>
-			<SectionList
-				sections={sectionListData}
-				keyExtractor={(item, index) => item.id.toString() + index}
-				renderItem={({ item }) => <TaskRow task={item} />}
-				renderSectionHeader={({ section: { title } }) => (
-					<View style={styles.sectionHeader}>
-						<Text style={styles.sectionHeaderText}>{title}</Text>
-					</View>
-				)}
-				stickySectionHeadersEnabled={false}
-			/>
+      <SectionList
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+        sections={sectionListData}
+        renderItem={({ item }) => <TaskRow task={item} />}
+        renderSectionHeader={({ section }) => <Text style={styles.header}>{section.title}</Text>}
+        stickySectionHeadersEnabled={true}
+      />
 		</>
 	);
 };
@@ -116,8 +111,15 @@ const styles = StyleSheet.create({
 	sectionHeaderText: {
 		fontSize: 16,
 		fontWeight: 'bold',
-		color: Colors.dark,
 	},
+  header: {
+    fontSize: 16,
+    backgroundColor: "#fff",
+    fontWeight: "bold",
+    padding: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.lightBorder,
+  }
 });
 
 export default Page;
