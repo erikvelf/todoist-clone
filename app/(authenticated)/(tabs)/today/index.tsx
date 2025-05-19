@@ -72,8 +72,6 @@ const Page = () => {
       const dateB = new Date(b.data[0].due_date || new Date());
       return dateA.getTime() - dateB.getTime();
     });
-    console.log("Page ~ listData sorted", listData);
-
     console.log(JSON.stringify(listData, null, 2));
 
     setSectionListData(listData);

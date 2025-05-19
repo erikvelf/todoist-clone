@@ -120,8 +120,8 @@ const RootLayout = () => {
   const expoDb = openDatabaseSync("todos");
   const db = drizzle(expoDb);
   const {success, error} = useMigrations(db, migrations);
-  console.log("RootLayout ~ success", success);
-  console.log("RootLayout ~ error", error);
+  // console.log("RootLayout migration ~ success", success);
+  // console.log("RootLayout migration ~ error", error);
 
   React.useEffect(() => {
     if (!success) {
