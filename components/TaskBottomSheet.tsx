@@ -11,10 +11,11 @@ import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Chip } from "@/components/Chip";
 import { eq } from "drizzle-orm";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useMMKVString } from "react-native-mmkv";
 import getDateObject from "@/utils/getDateObject";
 import { PROJECT_DEFAULTS } from "@/constants/Defaults";
+import { toast } from "sonner-native";
 
 interface TodoFormData {
   name: string;
@@ -35,6 +36,9 @@ export const TaskBottomSheet = () => {
 
   const db = useSQLiteContext();
   const drizzleDb = drizzle(db);
+  
+  const projectsList = useLiveQuery(drizzleDb.select().from(projects));
+  const projectsCount = projectsList.data.length
 
   const { data: projectsData } = useLiveQuery(drizzleDb.select().from(projects));
   const [selectedProject, setSelectedProject] = useState<Project>(
@@ -260,6 +264,13 @@ export const TaskBottomSheet = () => {
             }
           ]}
             onPress={() => {
+              if (projectsCount < 1) {
+                toast.error('Please create a project before adding a task');
+                router.push('/browse/new-project');
+                bottomSheetRef.current?.close();
+                return;
+              }
+              
               bottomSheetRef.current?.snapToIndex(1);
               Keyboard.dismiss();
               try {
