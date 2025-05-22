@@ -1,4 +1,5 @@
 import { Colors } from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import { Pressable, useWindowDimensions, Text, StyleSheet, Platform, Button } from "react-native";
 
@@ -58,8 +59,9 @@ const Layout = () => {
         headerTitleAlign: "center",
         headerLeft: () => Platform.OS === "ios" ? <Button title="Cancel" color={Colors.primary} onPress={() => router.dismiss()} /> : null,
         headerRight: () => (
-          <Pressable onPress={() => router.back()}>
-            <Text style={styles.doneButton}>Done</Text>
+          <Pressable onPress={() => router.push("/browse/new-project")} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <Ionicons name="add" size={24} color={Colors.primary} />
+            {/* <Text style={styles.doneButton}>Add</Text> */}
           </Pressable>
         ),
       }} />
