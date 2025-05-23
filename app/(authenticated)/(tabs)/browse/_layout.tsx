@@ -37,9 +37,9 @@ const HeaderLeft = () => {
 
 const HeaderRight = () => {
   return (
-    // <Link href="/browse/settings"> // temporarely disabled
-    <Ionicons name="settings-outline" size={24} color={Colors.primary} />
-    // </Link>
+    <Link href="/browse/settings">
+      <Ionicons name="settings-outline" size={24} color={Colors.primary} />
+    </Link>
   );
 };
 const styles = StyleSheet.create({
