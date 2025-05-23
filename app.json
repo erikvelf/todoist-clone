@@ -28,6 +28,35 @@
     "plugins": [
       "expo-router",
       [
+        "expo-alternate-app-icons",
+        [
+          {
+            "name": "red",
+            "ios": "./assets/images/icon.png",
+            "android": {
+              "foregroundImage": "./assets/images/icon.png",
+              "backgroundColor": "#001413"
+            }
+          },
+          {
+            "name": "blue",
+            "ios": "./assets/images/icon-blue.png",
+            "android": {
+              "foregroundImage": "./assets/images/icon-blue.png",
+              "backgroundColor": "#001413"
+            }
+          },
+          {
+            "name": "green",
+            "ios": "./assets/images/icon-green.png",
+            "android": {
+              "foregroundImage": "./assets/images/icon-green.png",
+              "backgroundColor": "#001413"
+            }
+          }
+        ]
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
@@ -60,7 +89,7 @@
           "project": "todoist-clone",
           "organization": "erikvelf-team"
         }
-      ],
+      ]
     ],
     "experiments": {
       "typedRoutes": true
