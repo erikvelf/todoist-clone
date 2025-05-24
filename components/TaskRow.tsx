@@ -8,6 +8,8 @@ import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { eq } from "drizzle-orm";
 import { useBottomSheet } from "@/context/BottomSheetContext";
 import { PROJECT_DEFAULTS } from "@/constants/Defaults";
+import ReanimatedSwipeable, { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
+import Reanimated, { useAnimatedStyle, useSharedValue, withTiming, Easing } from "react-native-reanimated";
 
 interface TaskRowProps {
   task: Todo;
@@ -24,23 +26,45 @@ const TaskRow = ({ task }: TaskRowProps) => {
     .where(eq(todos.id, Number(task.id)))
     .leftJoin(projects, eq(todos.project_id, projects.id)));
   // important: await drizzleDb.update() to make the data update in the list of uncompleted tasks in Today tab
+
+
+  const heightAnimation = useSharedValue(70);
+  const opacityAnimation = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacityAnimation.value,
+      height: heightAnimation.value,
+    }
+  })
+
   const markAsCompleted = async () => {
+    heightAnimation.value = withTiming(0, {
+      duration: 300,
+      easing: Easing.inOut(Easing.ease),
+    });
+    opacityAnimation.value = withTiming(0, {
+      duration: 300,
+      easing: Easing.inOut(Easing.ease),
+    });
+    await new Promise(resolve => setTimeout(resolve, 300));
     await drizzleDb.update(todos).set({ completed: 1, date_completed: Date.now() }).where(eq(todos.id, task.id));
   }
+
+  const todo = {
+    ...data[0]?.todos,
+    project_id: data[0]?.projects?.id ?? PROJECT_DEFAULTS.id,
+    project_name: data[0]?.projects?.name ?? PROJECT_DEFAULTS.name,
+    project_color: data[0]?.projects?.color ?? PROJECT_DEFAULTS.color,
+  }
+
 
   if (!!data && data.length === 0) {
     return null;
   }
 
-  const todo = {
-    ...data[0].todos,
-    project_id: data[0].projects?.id ?? PROJECT_DEFAULTS.id,
-    project_name: data[0].projects?.name ?? PROJECT_DEFAULTS.name,
-    project_color: data[0].projects?.color ?? PROJECT_DEFAULTS.color,
-  }
-
   return (
-    <View >
+    <Reanimated.View style={animatedStyle}>
         <TouchableOpacity onPress={() => openBottomSheetWithTask(todo)} style={styles.container}>
           <View style={styles.row}>
             <BouncyCheckbox
@@ -54,7 +78,7 @@ const TaskRow = ({ task }: TaskRowProps) => {
           </View>
           <Text style={styles.projectName}>{task.project_name}</Text>
         </TouchableOpacity>
-    </View>
+    </Reanimated.View>
   );
 };
 
