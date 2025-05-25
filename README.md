@@ -9,6 +9,12 @@ This project follows
 how to create React Native apps. Many thank for his tutorials helping others
 like me becoming a better RN developer!
 
+This Todoist clone can:
+
+- add tasks
+- add projects and delete projects
+- open tasks with prefilled information, ready to be modified
+
 ## Get started
 
 1. Install dependencies:
@@ -50,17 +56,6 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This
 project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and
-create a blank **app** directory where you can start developing.
 
 ## Learn more
 
